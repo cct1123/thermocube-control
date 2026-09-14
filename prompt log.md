@@ -466,3 +466,13 @@ Then stop for human approval.
 ```text
 prune review clean up commit push
 ```
+
+### Prompt 7 — explicit approval to push the full repository
+
+Approval context: push all committed files, including the supplied manual and
+this prompt log, to https://github.com/cct1123/thermocube-control after automatic
+approval review blocked the earlier push. This does not authorize hardware testing.
+
+```text
+yes
+```

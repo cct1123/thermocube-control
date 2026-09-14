@@ -1,6 +1,6 @@
 {
   "candidate": "TC-REVIEW-0.1.1",
-  "created_at": "2026-09-14T21:15:07.853987+00:00",
+  "created_at": "2026-09-14T21:19:40.704602+00:00",
   "disposition": "NO-GO for write-enabled hardware tests; no physical stage approved or executed",
   "scope": "Files in the containing Git commit, excluding this manifest itself. Generated reports, build artifacts, logs, environments and caches are excluded.",
   "verification": {
@@ -117,8 +117,8 @@
     },
     {
       "path": "prompt log.md",
-      "bytes": 11324,
-      "sha256": "bc8686c68d9de6fea995e9aae137fa7a1c4485bc2f30e74d01b1d72dab5d05f2"
+      "bytes": 11650,
+      "sha256": "b2a1a8f34842652be25f72861bf2d91a0ed7e3d5281682516d104da8ba0ca04c"
     },
     {
       "path": "pyproject.toml",
