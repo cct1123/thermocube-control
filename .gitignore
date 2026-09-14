@@ -1,0 +1,20 @@
+# Local Python environments and generated files
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+tmp/
+logs/
+.env
+.mypy_cache/
+*.log
+# Regenerated validation output; source manifest and concise check record are kept.
+records/*.txt
+records/tests.xml
+records/coverage.json

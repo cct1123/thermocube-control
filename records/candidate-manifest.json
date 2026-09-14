@@ -1,0 +1,224 @@
+{
+  "candidate": "TC-REVIEW-0.1.1",
+  "created_at": "2026-09-14T21:15:07.853987+00:00",
+  "disposition": "NO-GO for write-enabled hardware tests; no physical stage approved or executed",
+  "scope": "Files in the containing Git commit, excluding this manifest itself. Generated reports, build artifacts, logs, environments and caches are excluded.",
+  "verification": {
+    "hardware_access": false,
+    "checkout_tests": 640,
+    "covered_statements": 1198,
+    "total_statements": 1284,
+    "coverage_percent": 93.30218068535825,
+    "lint_format_types_dependencies": "pass; records/software-checks.json",
+    "local_document_links_checked": 26,
+    "host": "Windows / Python 3.12.14",
+    "physical_validation": "not performed"
+  },
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 136,
+      "sha256": "4489bf0be36cd4935c8cc310d4be867b5783bc442790a41e4acb1d13594d3aaa"
+    },
+    {
+      "path": ".github/workflows/tests.yml",
+      "bytes": 831,
+      "sha256": "ecb71e83ef2be977834fa573d0ea2f55ff9135a916f80d8247021f392c894ee7"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 323,
+      "sha256": "22b213693fad70c1d56ef6a334fa3090d371ebc0cfe381f9fab1120fb8d2c1ae"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 1429,
+      "sha256": "bcc41b27ba352f1e13582e841bfb25bd827c0c27b47408bf2004f07a9a0f82c9"
+    },
+    {
+      "path": "ARCHITECTURE.md",
+      "bytes": 7934,
+      "sha256": "ba9d5531e39cf4833b2f0966484c8670ce9ef284c04d1b70603a157273aa8c26"
+    },
+    {
+      "path": "MANIFEST.in",
+      "bytes": 324,
+      "sha256": "261e5a6b7f5b502fe2f71001cfa1c667c16e60b49958344e1b493611cf634fd2"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2563,
+      "sha256": "f907bb0319cee118032cebb8163b4118562d5577d9f53e0328bb296d82824f1b"
+    },
+    {
+      "path": "app/__init__.py",
+      "bytes": 83,
+      "sha256": "249294a4d7d75c4a933465b1388f30239c2c0a75324c174e92d97e8b0973c52f"
+    },
+    {
+      "path": "app/assets/style.css",
+      "bytes": 2907,
+      "sha256": "24685be46568638627e6a93c2d42cd8e706af25cb9250d6f283a1bfff75693ab"
+    },
+    {
+      "path": "app/cli.py",
+      "bytes": 4159,
+      "sha256": "c3706b80ea8a49aa39f3b2ae91107875771e94a83f0595de2c34458f1d8cd828"
+    },
+    {
+      "path": "app/dash_app.py",
+      "bytes": 15351,
+      "sha256": "5bb4e5963e3e708fdfd05b34e834c42e1e5c052edfab884d1ebf033f76dcdc49"
+    },
+    {
+      "path": "docs/HARDWARE_VALIDATION.md",
+      "bytes": 12395,
+      "sha256": "ab8aef56a1dd85bbf80fdbbc505a9b93f9a231db97808b53e97aef8bad20044b"
+    },
+    {
+      "path": "docs/OPERATIONS.md",
+      "bytes": 5675,
+      "sha256": "976e718a8052f7182d59dc970bdae3916ef2d02c2e10c1f9a33f25edacbcd4c2"
+    },
+    {
+      "path": "docs/PROTOCOL.md",
+      "bytes": 15238,
+      "sha256": "87379a8157c55112e21e4f857a5d7866ae43fffb07d042c55ad8130ce01139a6"
+    },
+    {
+      "path": "docs/REVIEW.md",
+      "bytes": 11574,
+      "sha256": "3d4b2b40001e4871e7a2b0b5292268f213c4e26da63ec5e2bc605f6ebacfdce8"
+    },
+    {
+      "path": "docs/SAFETY.md",
+      "bytes": 5908,
+      "sha256": "1518a1da5375502ba1e9aa944682b13a0d1fb2ed79b93e64e1d77f3731c5d0ad"
+    },
+    {
+      "path": "docs/TESTING.md",
+      "bytes": 4807,
+      "sha256": "f2e2c7a1202a9c59dd69bacfbf63af20ed718f1e7d8d9cefec9f8556e9c891cd"
+    },
+    {
+      "path": "examples/hardware.example.json",
+      "bytes": 216,
+      "sha256": "d2600335029794424a0c466bb25d02a1280d62e935e25f544ac2c68105470f32"
+    },
+    {
+      "path": "inputs/README.md",
+      "bytes": 3857,
+      "sha256": "5d45646149aeec3630a6c5d4ee65e8f9843bfd744fe96516c49708f539c9ed47"
+    },
+    {
+      "path": "inputs/Thermocube-II-rev-M5.pdf",
+      "bytes": 2620360,
+      "sha256": "e7a4508828bd439a76958e20a6e660393470b5a07fd95f510c69a0700fbb529d"
+    },
+    {
+      "path": "prompt log.md",
+      "bytes": 11324,
+      "sha256": "bc8686c68d9de6fea995e9aae137fa7a1c4485bc2f30e74d01b1d72dab5d05f2"
+    },
+    {
+      "path": "pyproject.toml",
+      "bytes": 1265,
+      "sha256": "ef705fe35f958d83c509be235e4ed3eb788c849654606c8dc60387b6ec4d6e0f"
+    },
+    {
+      "path": "records/software-checks.json",
+      "bytes": 860,
+      "sha256": "43a70419ae52b6ff0d34b096f7886f8f9b30cda8f1011b3357e852211a8aec55"
+    },
+    {
+      "path": "requirements-lock.txt",
+      "bytes": 924,
+      "sha256": "f13dda4a7a8ff07d3774dba2d9b346e384e16e806b9a0f6e0af05d7111a4cb3a"
+    },
+    {
+      "path": "tests/conftest.py",
+      "bytes": 4140,
+      "sha256": "70d2fe6a9e35554fd7c3fc392318c797135d32c726609419e90cfe343fc9db79"
+    },
+    {
+      "path": "tests/test_driver_transport.py",
+      "bytes": 8596,
+      "sha256": "8d01fa0c99bc6c09682c41615380690f1ef8cf92ef47e789c0630f6bcfb56f58"
+    },
+    {
+      "path": "tests/test_gui.py",
+      "bytes": 6378,
+      "sha256": "438b3c78c011ad772982aa35b7830bccebde610645e45a613493712dc4b143f6"
+    },
+    {
+      "path": "tests/test_protocol.py",
+      "bytes": 5688,
+      "sha256": "6dc0191c06fc0cfce745dea1772a4eb7de7396852712e8d1b24b1a8f2f76f42c"
+    },
+    {
+      "path": "tests/test_review_regressions.py",
+      "bytes": 8611,
+      "sha256": "06e4d4e65791ce6a3df0181bc2fd82aa15aea627a2b84398e904521391ee46ed"
+    },
+    {
+      "path": "tests/test_safety_integration.py",
+      "bytes": 8309,
+      "sha256": "222cd62a1dbc4625b31ac7304a393010f18d1b42d50abcd752da6a792c3108da"
+    },
+    {
+      "path": "tests/test_simulator_service.py",
+      "bytes": 10581,
+      "sha256": "66b19eafd44bbdb89f4d1caeb890ebbcff52fcc67536a4985c3a67fb6267f22d"
+    },
+    {
+      "path": "thermocube/__init__.py",
+      "bytes": 356,
+      "sha256": "75300942c4e85b55d9baed30c3d0d2ef78b186182fbf4d98dc71b936820396ed"
+    },
+    {
+      "path": "thermocube/acquisition.py",
+      "bytes": 14340,
+      "sha256": "ace9fa07d432053d573c950a42b0530925c16bab7a52371b9e6ecb6030b65384"
+    },
+    {
+      "path": "thermocube/driver.py",
+      "bytes": 14535,
+      "sha256": "ef59e07374353904314bce7fc47ceaf6b47e21afc83691840d99ff6198c9be77"
+    },
+    {
+      "path": "thermocube/logging.py",
+      "bytes": 5331,
+      "sha256": "df25211630751e4488ed382aba302b636a013a5f251f11977c7bb1db5f479a9d"
+    },
+    {
+      "path": "thermocube/models.py",
+      "bytes": 3469,
+      "sha256": "25639e1dff1c4e13c349e89cb0fb813839dd43c2fdf22901a0e852062a2c7076"
+    },
+    {
+      "path": "thermocube/protocol.py",
+      "bytes": 5200,
+      "sha256": "e507bba5da22da2d6a08e031c7c3f94b7b52764c454cf0f3b607b88e27344b3b"
+    },
+    {
+      "path": "thermocube/py.typed",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "thermocube/simulator.py",
+      "bytes": 8783,
+      "sha256": "9117fcea394373f2c02a5641f9ce3b212fddda06b4667ae814f3713823652781"
+    },
+    {
+      "path": "thermocube/transport.py",
+      "bytes": 15587,
+      "sha256": "9006a78bd8bc60f2964873fa7febfdb8bdc8f969c3901615551aa108ad0f1b46"
+    },
+    {
+      "path": "tools/verify_artifacts.py",
+      "bytes": 3278,
+      "sha256": "e6528cf8839f6a88fc8ced5df44fdba6167e104c59f2aba80ccfa746da226dcd"
+    }
+  ]
+}

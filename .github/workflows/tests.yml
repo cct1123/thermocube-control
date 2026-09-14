@@ -1,0 +1,24 @@
+name: Hardware-free checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  offline:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python: ['3.11', '3.12']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -c requirements-lock.txt -e ".[gui,dev]"
+      - run: python -m ruff check thermocube app tests tools
+      - run: python -m ruff format --check thermocube app tests tools
+      - run: python -m mypy thermocube app
+      - run: python -m pytest -q --cov=thermocube --cov=app --cov-fail-under=90
+      - run: python -m pip check
+      - run: python -m build --no-isolation
+      - run: python tools/verify_artifacts.py

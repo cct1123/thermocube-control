@@ -1,0 +1,32 @@
+{
+  "candidate": "TC-REVIEW-0.1.1",
+  "date": "2026-09-14",
+  "hardware_access": false,
+  "results": [
+    {
+      "command": ".venv\\Scripts\\python --version",
+      "exit_code": 0,
+      "output": "Python 3.12.14"
+    },
+    {
+      "command": ".venv\\Scripts\\python -m ruff check thermocube app tests tools",
+      "exit_code": 0,
+      "output": "All checks passed!"
+    },
+    {
+      "command": ".venv\\Scripts\\python -m ruff format --check thermocube app tests tools",
+      "exit_code": 0,
+      "output": "19 files already formatted"
+    },
+    {
+      "command": ".venv\\Scripts\\python -m mypy thermocube app",
+      "exit_code": 0,
+      "output": "Success: no issues found in 11 source files"
+    },
+    {
+      "command": ".venv\\Scripts\\python -m pip check",
+      "exit_code": 0,
+      "output": "No broken requirements found."
+    }
+  ]
+}

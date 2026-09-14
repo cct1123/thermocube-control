@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.pdf binary
+# Prompt text is retained verbatim, including trailing spaces.
+"prompt log.md" whitespace=-blank-at-eol
