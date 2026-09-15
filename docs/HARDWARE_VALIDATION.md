@@ -215,6 +215,10 @@ physical method when necessary; do not repair state with speculative bytes,
 alarm reset, profile changes or an unapproved power cycle. Disconnect alone is
 not an abort mechanism for a running chiller.
 
+Ctrl+C during serial I/O is also an uncertain outcome. The driver attempts to
+close/disarm and requires recovery, then propagates the interruption. It sends
+no STOP or other cleanup command; use the approved physical method when needed.
+
 Late/ambiguous I/O quarantines that controller's stream. Reopening cannot rearm
 or replay commands. There is no global registry: replacing an object or process
 does not establish safety. Every new owner must verify the stream and physical

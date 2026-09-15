@@ -68,10 +68,12 @@ class Monitor:
                 raise RuntimeError("Create a new monitor after stopping")
             if self._csv_path is not None:
                 self._file = Path(self._csv_path).open("x", newline="", encoding="utf-8")
-            self._thread = threading.Thread(target=self._run, name="thermocube-monitor")
             try:
+                self._thread = threading.Thread(target=self._run, name="thermocube-monitor")
                 self._thread.start()
             except Exception:
+                self._thread = None
+                self._stop.set()
                 if self._file:
                     self._file.close()
                 raise

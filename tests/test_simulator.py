@@ -53,6 +53,17 @@ def test_simulator_faults_delays_and_injected_link_failures(profile):
             slow.status()
 
 
+@pytest.mark.parametrize("profile", ["legacy-r2", "thermocube-ii-m5"])
+def test_simulated_run_reporting_matches_the_selected_fault_profile(profile):
+    with Simulator(profile=profile) as device:
+        for running in (False, True, False):
+            device.start() if running else device.stop()
+            sample = device.status()
+            assert sample.requested_run is running
+            expected = running if profile == "thermocube-ii-m5" else None
+            assert sample.reported_run is expected
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [

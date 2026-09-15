@@ -9,7 +9,7 @@ The target unit is **10-400-1D-1-CP-R2-LT-AR-267**.
 | Area | Status |
 | --- | --- |
 | Driver | Version **0.2.0** implements serial connection, temperature/fault queries, setpoints and start/stop controls. |
-| Software validation | **65 tests pass; 94.98% coverage** on Windows / Python 3.12.14. Lint, types and package checks pass. [Evidence](docs/REVIEW.md). |
+| Software validation | **81 tests pass; 95.96% coverage** on Windows / Python 3.12.14. Lint, types and package checks pass. [Evidence](docs/REVIEW.md). |
 | Physical validation | **Compatibility is unconfirmed. No hardware stage is approved or completed.** The fault profile, framing, wiring and operating limits still need confirmation for the actual unit. |
 
 The workflow below prepares an approved hardware session. Follow the
@@ -170,8 +170,9 @@ explain how to share the controller with a monitor.
   before releasing the port. **Disconnecting or closing Python is not an abort.**
 - Stop background monitoring before disconnecting. A stale RUN query can request
   RUN again after a stop or manual intervention; there is no established neutral read.
-- On uncertain communication, stop traffic and use the independent physical abort
-  method if needed. The driver closes/disarms and never replays the command.
+- On failed or interrupted serial I/O (including Ctrl+C), stop traffic and use the
+  independent physical abort method if needed. The driver closes/disarms and
+  requires recovery; it never replays the command or sends an automatic STOP.
 - Follow the [recovery procedure](docs/HARDWARE_VALIDATION.md#abort-and-later-recovery)
   before reopening/rearming. Replacing the controller or restarting Python does
   not establish recovery.

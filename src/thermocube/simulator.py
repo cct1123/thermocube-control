@@ -175,7 +175,7 @@ class Simulator:
                 None if faults.has_fault else self._setpoint,
                 faults,
                 self._running,
-                self._running,
+                None if faults.standby is None else not faults.standby,
             )
 
     def __enter__(self) -> Simulator:

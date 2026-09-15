@@ -245,6 +245,52 @@ def test_uncertain_io_closes_locks_and_never_retries(hardware, failure, error):
     assert len(wire.calls) == 1
 
 
+@pytest.mark.parametrize("phase", ["open", "write", "read", "close"])
+@pytest.mark.parametrize("error", [KeyboardInterrupt, SystemExit])
+def test_interrupted_serial_io_closes_and_requires_recovery(hardware, monkeypatch, phase, error):
+    device, wire, _ = hardware
+    open_peer, close_peer = wire.open, wire.close
+
+    def interrupted(*args):
+        raise error("cancelled")
+
+    if phase == "open":
+
+        def interrupted_open():
+            wire.is_open = True  # The handle was acquired before cancellation.
+            raise error("cancelled")
+
+        monkeypatch.setattr(wire, "open", interrupted_open)
+        operation = device.connect
+    else:
+        arm(device, control=True)
+        if phase == "write":
+            wire.write_error = error("cancelled")
+            operation = device.read_temperature
+        elif phase == "read":
+            monkeypatch.setattr(wire, "read", interrupted)
+            operation = device.read_temperature
+        else:
+
+            def interrupted_close():
+                wire.is_open = False
+                raise error("cancelled")
+
+            monkeypatch.setattr(wire, "close", interrupted_close)
+            operation = device.disconnect
+
+    with pytest.raises(error, match="cancelled"):
+        operation()
+    assert not device.is_connected and not wire.is_open
+    assert not device.queries_enabled and not device.control_enabled and device.needs_recovery
+    assert len(wire.calls) == (1 if phase in ("read", "write") else 0)
+    monkeypatch.setattr(wire, "open", open_peer)
+    monkeypatch.setattr(wire, "close", close_peer)
+    device.connect()
+    with pytest.raises(SafetyError, match="recovery"):
+        device.arm_queries(run=False, acknowledgement=QUERY_ACK)
+
+
 def test_partial_reads_and_explicit_recovery(hardware):
     device, wire, _ = hardware
     arm(device)
@@ -301,6 +347,18 @@ def test_open_is_one_attempt_and_close_failure_is_explicit(hardware):
     with pytest.raises(ConnectionError):
         device.disconnect()
     assert not device.is_connected and device.needs_recovery
+
+
+@pytest.mark.parametrize("close_error", [OSError("close failed"), KeyboardInterrupt("cancelled")])
+def test_failed_open_cleanup_preserves_cancellation_and_recovery(hardware, close_error):
+    device, wire, _ = hardware
+    wire.open_error = OSError("busy")
+    wire.close_error = close_error
+    expected = ConnectionError if isinstance(close_error, OSError) else KeyboardInterrupt
+    with pytest.raises(expected):
+        device.connect()
+    assert not device.is_connected and device.needs_recovery
+    assert wire.opens == wire.closes == 1 and not wire.calls
 
 
 def test_concurrent_setpoint_operations_are_not_interleaved(hardware):
@@ -376,6 +434,28 @@ def test_uncertain_start_does_not_trigger_retry_or_implicit_stop(hardware):
     assert [data for _, data in wire.calls] == [b"\x88", b"\xe0"]
     with pytest.raises(ConnectionError):
         device.stop()
+
+
+@pytest.mark.parametrize("error", [KeyboardInterrupt, SystemExit])
+def test_interrupted_start_never_replays_or_sends_cleanup_commands(hardware, error):
+    device, wire, _ = hardware
+    arm(device, control=True)
+
+    def interrupted_start(packet):
+        if packet == b"\xe0":
+            wire.running = True  # Delivery occurred before the caller was interrupted.
+            raise error("start interrupted")
+
+    wire.on_write = interrupted_start
+    with pytest.raises(error, match="start interrupted"):
+        device.start()
+    assert wire.running and not device.is_connected and device.needs_recovery
+    assert [data for _, data in wire.calls] == [b"\x88", b"\xe0"]
+    with pytest.raises(ConnectionError):
+        device.start()
+    with pytest.raises(ConnectionError):
+        device.stop()
+    assert len(wire.calls) == 2
 
 
 def test_explicit_stop_then_disconnect_waits_for_inflight_operation(hardware):

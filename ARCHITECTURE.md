@@ -47,9 +47,15 @@ Uncertain I/O closes/disarms, never retries, and requires acknowledged physical
 recovery before rearming. Faults inhibit queries/start/setpoint while existing
 write permission still allows an explicit STOP.
 
+Cancellation during serial opening, reading, writing or closing also requires
+recovery. The driver attempts to close the handle and propagates KeyboardInterrupt
+or SystemExit; it sends no cleanup commands. A failed open still releases any
+acquired handle, and cancellation during that cleanup is not swallowed.
+
 `Status` and `Faults` are immutable observations. Status timestamps precede the
 first query and never make old temperatures appear fresh. M5 reports standby;
 legacy run intent remains unverified. Raw and unknown fault bits stay visible.
+The simulator also leaves reported run state absent for the legacy profile.
 
 ## Optional consumers and shutdown
 
@@ -58,6 +64,8 @@ connected/armed device, stores bounded history and optionally flushes CSV rows.
 Errors create gaps. CSV failure ends polling. The application owns connection,
 recovery and its audit/abort requirements. A stop timeout leaves I/O ownership
 with the caller until the worker has joined.
+If worker construction or startup fails, its CSV is closed and the monitor stays
+stopped; calling stop() remains safe. Create a new monitor for another attempt.
 
 Dash refreshes only cached observations. Confirmed actions call the public device
 API. Missing, future or older-than-3.5-second observations cannot enable START or

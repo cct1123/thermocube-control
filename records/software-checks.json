@@ -37,7 +37,7 @@
     {
       "command": "uv run --locked --extra gui pytest -q --cov=thermocube --cov-fail-under=90 --cov-report=term-missing --cov-report=json:records/coverage.json --junitxml=records/tests.xml",
       "exit_code": 0,
-      "output": "65 passed; 94.98% coverage (624/657 statements)"
+      "output": "81 passed; 95.96% coverage (642/669 statements)"
     },
     {
       "command": "uv pip check",
@@ -52,7 +52,7 @@
     {
       "command": "uv run --locked --extra gui python tools/verify_artifacts.py",
       "exit_code": 0,
-      "output": "Independent uv environments passed installed-wheel metadata, imports, CSS, Dash endpoints, headless CSV/shutdown, all 65 extracted-source tests and the example."
+      "output": "Independent uv environments passed installed-wheel metadata, imports, CSS, Dash endpoints, headless CSV/shutdown, all 81 extracted-source tests and the example."
     },
     {
       "command": "uv run --locked --no-dev thermocube --headless --duration 0.1",
@@ -75,9 +75,24 @@
       "output": "14 local links/anchors resolve; HTTPS remote verified in preceding README pass; source archive includes exact README and screenshot; wheel metadata contains README."
     },
     {
-      "check": "Hardware README examples through the real controller and fake serial in both profiles",
+      "check": "Hardware README examples verified during the preceding documentation pass",
       "result": "pass",
       "output": "10 cases verify one fault/temperature/setpoint query, setpoint write/readback, fault refusal, exact bytes, pacing and zero-TX disconnect. Unedited profile placeholder fails before opening. Physical serial opening/discovery blocked."
+    },
+    {
+      "check": "Regression reproduction before fixes",
+      "result": "confirmed",
+      "output": "11 failures and 1 passing control case reproduced interrupted serial cleanup/recovery, monitor startup CSV/stop failures and incorrect legacy simulator run reporting."
+    },
+    {
+      "check": "Review regression coverage after fixes",
+      "result": "pass",
+      "output": "16 added cases pass in the 81-test suite: interrupted open/read/write/close, cancellation during failed-open cleanup, no replay or implicit STOP after interrupted RUN delivery, worker construction/startup cleanup, and both simulator fault profiles."
+    },
+    {
+      "check": "Local documentation links and anchors",
+      "result": "pass",
+      "output": "23 local Markdown links/anchors resolve, including all 14 README links; historical prompt quotations excluded."
     }
   ]
 }

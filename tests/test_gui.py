@@ -304,3 +304,28 @@ def test_monitor_configuration_and_stop_before_start():
     monitor.stop()
     with pytest.raises(RuntimeError):
         monitor.start()
+
+
+@pytest.mark.parametrize("phase", ["construct", "start"])
+def test_monitor_worker_startup_failure_closes_csv_and_can_be_stopped(monkeypatch, phase):
+    from thermocube import gui
+
+    output = io.StringIO()
+    monkeypatch.setattr(Path, "open", lambda *args, **kwargs: output)
+
+    def fail(*args, **kwargs):
+        raise RuntimeError("worker unavailable")
+
+    if phase == "construct":
+        monkeypatch.setattr(gui.threading, "Thread", fail)
+    else:
+        monkeypatch.setattr(gui.threading.Thread, "start", fail)
+    with Simulator() as device:
+        monitor = Monitor(device, csv_path="unused.csv")
+        with pytest.raises(RuntimeError, match="worker unavailable"):
+            monitor.start()
+        assert output.closed
+        monitor.stop()
+        assert not monitor.is_running and device.is_connected
+        with pytest.raises(RuntimeError, match="new monitor"):
+            monitor.start()

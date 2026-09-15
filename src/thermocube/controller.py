@@ -211,12 +211,18 @@ class ThermoCube:
                 port.open()
                 if not port.is_open:
                     raise OSError("Port did not open")
-            except OSError as exc:
+            except BaseException as exc:
+                if not isinstance(exc, OSError):
+                    self._uncertain = True
                 try:
                     port.close()
-                except OSError:
+                except BaseException as close_error:
                     self._uncertain = True
-                raise ConnectionError(f"Cannot open {self._port_name}: {exc}") from exc
+                    if not isinstance(close_error, OSError):
+                        raise
+                if isinstance(exc, OSError):
+                    raise ConnectionError(f"Cannot open {self._port_name}: {exc}") from exc
+                raise
             self._serial = port
             self._next_tx = max(self._next_tx, time.monotonic() + self._interval)
 
@@ -228,9 +234,11 @@ class ThermoCube:
             if port is not None:
                 try:
                     port.close()
-                except OSError as exc:
+                except BaseException as exc:
                     self._uncertain = True
-                    raise ConnectionError(f"Port close failed: {exc}") from exc
+                    if isinstance(exc, OSError):
+                        raise ConnectionError(f"Port close failed: {exc}") from exc
+                    raise
 
     def arm_queries(self, *, run: bool, acknowledgement: str) -> None:
         """Acknowledge an independently established state; every query reasserts it."""
@@ -334,14 +342,17 @@ class ThermoCube:
                     time.sleep(min(0.001, max(0, deadline - time.monotonic())))
             if port.in_waiting:
                 raise ConnectionError("Unexpected bytes after response")
-        except OSError as exc:
+        except BaseException as exc:
+            # Cancellation can leave a delivered command or a reply in flight.
             self._quarantine()
             self._log.debug("port=%s RX=%s uncertain=%s", self._port_name, rx.hex(), exc)
             if isinstance(exc, serial.SerialTimeoutException):
                 raise TimeoutError(f"Serial write timed out: {exc}") from exc
             if isinstance(exc, (TimeoutError, ConnectionError)):
                 raise
-            raise ConnectionError(f"Serial exchange failed: {exc}") from exc
+            if isinstance(exc, OSError):
+                raise ConnectionError(f"Serial exchange failed: {exc}") from exc
+            raise
         self._log.debug(
             "port=%s RX=%s outcome=%s",
             self._port_name,

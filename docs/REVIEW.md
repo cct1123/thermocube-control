@@ -6,7 +6,7 @@ No physical port discovery, opening, commands or power operations were performed
 ## Changes
 
 The runtime is reduced from **11 Python files / 2,255 lines / 25 classes** to
-**4 Python files / 1,057 lines / 6 classes**: `controller`, `simulator`, `gui`,
+**4 Python files / 1,070 lines / 6 classes**: `controller`, `simulator`, `gui`,
 plus the package export file. This leaves three implementation modules and two
 immutable result records; no standalone protocol, monitoring or launcher module.
 
@@ -51,7 +51,27 @@ serial/physical preparation, one approved fault query, separately approved
 temperature/setpoint checks, and a bounded setpoint-write example. An operation
 table explains reads, start/stop and disconnect. A connection diagram shows the
 experiment-to-chiller path. Simulation and its existing screenshot are supporting
-material near the bottom, followed by developer details. Runtime code is unchanged.
+material near the bottom, followed by developer details. That documentation pass
+did not change runtime code.
+
+## Review fixes
+
+- **Interrupted serial I/O:** KeyboardInterrupt/SystemExit previously bypassed
+  cleanup and the recovery latch. An interrupted open could leak an acquired
+  handle; an interrupted exchange could leave queries and writes enabled. Opening,
+  reading, writing and closing now clean up, retain recovery requirements and
+  propagate cancellation. Cancellation during failed-open cleanup also propagates.
+  No command is replayed and no implicit STOP follows uncertain RUN delivery.
+- **Monitor startup:** thread construction failure could leak the CSV; failed
+  thread startup left an unstarted thread that stop() could not join. Both paths
+  now close CSV and leave a stopped, single-use monitor with safe cleanup.
+- **Legacy simulation:** reported_run incorrectly contained a verified-looking
+  boolean despite the legacy profile having no run-status bit. It now remains
+  None while requested_run preserves intent, matching the hardware API and UI.
+
+The initial regression run reproduced 11 failures before the fixes. The expanded
+suite adds 16 cases for cancellation, cleanup and profile reporting. No modules,
+classes, dependencies or compatibility wrappers were added.
 
 ## Retained hardware protections and tradeoffs
 
@@ -82,10 +102,10 @@ provide a hard emergency-stop deadline; an independent physical method is requir
 The rewritten suite covers protocol vectors and exhaustive word/fault cases,
 actual controller I/O through fake serial, state locks, fault preflight, uncertain
 delivery, concurrency, recovery, simulator, monitoring/CSV and Dash/CLI behavior.
-Local results: **65 tests pass; 94.98% statement coverage (624/657 statements)**.
+Local results: **81 tests pass; 95.96% statement coverage (642/669 statements)**.
 Ruff lint/format, mypy and dependency checks pass. The wheel and source archive
 build successfully. Isolated wheel imports, packaged CSS, Dash endpoints and
-headless CSV/shutdown pass; all 65 tests also pass from the extracted source
+headless CSV/shutdown pass; all 81 tests also pass from the extracted source
 archive. Reproduction commands are in [TESTING.md](TESTING.md).
 
 The relocated package passes HTTP layout/action/history and packaged-asset tests.

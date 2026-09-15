@@ -603,3 +603,9 @@ Goal: a new lab user should quickly understand:
 ```text
 more focus on using with real hardware
 ```
+
+## 2026-09-15 — Review, fix and publish
+
+```text
+review fix issues commit push  
+```

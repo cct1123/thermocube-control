@@ -238,6 +238,10 @@ prove that a later response will not arrive. Do not retry a write with uncertain
 delivery. No RS-232 maximum response time is specified here; the 200 ms figure
 on p. 26 is in the RS-485 section and is not adopted as an R2 guarantee.
 
+Interrupted serial I/O also invalidates the stream: Ctrl+C or SystemExit propagates
+after closing/disarming and setting the recovery gate. No retry or implicit STOP
+is sent, even if cancellation occurred after RUN delivery.
+
 ## Uncertainty register and gates
 
 | ID | Evidence / unresolved question | Consequence and closure |
