@@ -50,9 +50,13 @@ The README now leads with hardware use: uv installation and offline checks,
 serial/physical preparation, one approved fault query, separately approved
 temperature/setpoint checks, and a bounded setpoint-write example. An operation
 table explains reads, start/stop and disconnect. A connection diagram shows the
-experiment-to-chiller path. Simulation and its existing screenshot are supporting
-material near the bottom, followed by developer details. That documentation pass
-did not change runtime code.
+experiment-to-chiller path. An expanded GUI showcase near the top displays the
+existing simulator screenshot with a readings/controls/chart guide and direct
+links into the hardware workflow. The image is no longer hidden in a collapsed
+section. Simulator launch instructions and developer details remain near the
+bottom. The screenshot extension is corrected from .png to .jpg to match its
+JPEG encoding; image bytes are unchanged. These documentation changes do not
+change runtime code.
 
 ## Review fixes
 
@@ -111,7 +115,7 @@ archive. Reproduction commands are in [TESTING.md](TESTING.md).
 The relocated package passes HTTP layout/action/history and packaged-asset tests.
 The README browser check confirmed initial CONNECTED/STANDBY, an 18 C setpoint,
 START, a cooling trace and return to STANDBY; the running display was captured in
-docs/images/simulator.png. Physical serial opening and discovery were blocked.
+docs/images/simulator.jpg. Physical serial opening and discovery were blocked.
 The temporary server and browser were closed. The earlier browser check also
 covered retained state/history after reload and the disconnected/disabled display.
 

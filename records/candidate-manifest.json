@@ -1,9 +1,9 @@
 {
   "candidate": "TC-REVIEW-0.2.0",
-  "created_at": "2026-09-15T22:20:05.727081+00:00",
+  "created_at": "2026-09-15T22:36:15.852916+00:00",
   "disposition": "NO-GO for write-enabled hardware tests; no physical stage approved or executed",
   "scope": "Listed working-tree source files, excluding this manifest itself. Generated reports, build artifacts, logs, environments and caches are excluded.",
-  "base_commit": "ef76b18cc380ff31ceef256f26c38f09b4446963",
+  "base_commit": "49f2ced42620af299f0cab50c6e1f23846b97432",
   "runtime": {
     "package_root": "src/thermocube",
     "implementation_modules": [
@@ -22,15 +22,16 @@
     "total_statements": 669,
     "coverage_percent": 95.96412556053812,
     "lint_format_types_dependencies": "pass; records/software-checks.json",
-    "browser_simulation": "Screenshot captured at 82b04ea: initial standby, confirmed 18 C setpoint, START, cooling trace, STANDBY; docs/images/simulator.png; physical access blocked and server/browser closed. Current review uses HTTP/callback tests; GUI layout unchanged.",
+    "browser_simulation": "Screenshot captured at 82b04ea: initial standby, confirmed 18 C setpoint, START, cooling trace, STANDBY; current path docs/images/simulator.jpg (extension corrected to match JPEG encoding); physical access blocked and server/browser closed. Current review uses HTTP/callback tests; GUI layout unchanged.",
     "host": "Windows / Python 3.12.14 / uv 0.11.2",
     "physical_validation": "not performed",
     "package_build_and_isolated_artifacts": "pass; uv_build distributions, independent uv environments, wheel metadata/entry point/assets, all 81 extracted-source tests and simulation example",
-    "readme_local_links_checked": 14,
+    "readme_local_links_checked": 19,
     "readme_examples": "Preceding documentation pass: 10 hardware-example cases through real controller/fake serial. Current public-operation regressions pass; examples unchanged and no physical access performed.",
-    "packaged_readme": "pass; source README/screenshot bytes match checkout and wheel metadata includes the new README",
-    "local_document_links_checked": 23,
-    "review_fixes": "16 regression cases added for serial cancellation/recovery, monitor startup cleanup and legacy simulator reporting; no modules, classes or dependencies added"
+    "packaged_readme": "pass; source includes README and simulator.jpg with identical checkout bytes; wheel metadata includes README",
+    "local_document_links_checked": 28,
+    "review_fixes": "16 regression cases added for serial cancellation/recovery, monitor startup cleanup and legacy simulator reporting; no modules, classes or dependencies added",
+    "readme_gui_showcase": "Expanded near the top; no collapsed HTML; screenshot inspected and JPEG signature verified; image bytes unchanged; visible feature guide and hardware workflow navigation"
   },
   "files": [
     {
@@ -65,8 +66,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 11405,
-      "sha256": "822eeddf09a2cc151a7adbd05d91391d3a8b34358c97d5aea2f515301de8ca64"
+      "bytes": 12509,
+      "sha256": "5f3e385abd86d9aeba5cad181c5c39225a8d72b2ae19a6d4d878ca36e2c79162"
     },
     {
       "path": "docs/HARDWARE_VALIDATION.md",
@@ -80,8 +81,8 @@
     },
     {
       "path": "docs/REVIEW.md",
-      "bytes": 9914,
-      "sha256": "72f6af2bd9beaf2ddf00a62e3888c9d3904a220b007fcc60d9240c2a853b963a"
+      "bytes": 10210,
+      "sha256": "ec7be5fb9a3d9603b86c5f6a71f4b06efd6d4b4253e03f589576a903b3ecbca0"
     },
     {
       "path": "docs/TESTING.md",
@@ -89,7 +90,7 @@
       "sha256": "9ea61e296097faea93c27a91f696daf5ec89cfd6f9c837d60d783f014302c558"
     },
     {
-      "path": "docs/images/simulator.png",
+      "path": "docs/images/simulator.jpg",
       "bytes": 86434,
       "sha256": "061083fb93dae7f7f3b49a087ad0c9db92e841af3a2c1839c67f6068efd0c3b1"
     },
@@ -110,18 +111,18 @@
     },
     {
       "path": "prompt log.md",
-      "bytes": 18620,
-      "sha256": "be3d5229159d2da6efd8bcf7b4a0caa5078dfd009dc62ceb999a2a124c27707f"
+      "bytes": 18752,
+      "sha256": "edd3cf4849ef01b0f287dc434b3e8c536f25019e5fb9179a3ebbdce5c33bf936"
     },
     {
       "path": "pyproject.toml",
       "bytes": 1322,
-      "sha256": "64533f88bb5790e82402f2e80e7f7f9679218d53043d5bcdcdc73ad5a9049973"
+      "sha256": "01d1ed88ffb2f494f61f8b4920a4c41bcaddfa6181a901b5b8a2eb8ee06c987e"
     },
     {
       "path": "records/software-checks.json",
-      "bytes": 4195,
-      "sha256": "9e39918b175ae41be99f2b63e0ff262433b66a331f0c10260474fe6281be2208"
+      "bytes": 4538,
+      "sha256": "51dea5570081345a2f5ca099f03380ad257a5d21305565e90c3bb7c8ebd49cb6"
     },
     {
       "path": "src/thermocube/__init__.py",

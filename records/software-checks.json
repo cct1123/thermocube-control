@@ -62,7 +62,7 @@
     {
       "check": "Simulator browser workflow (screenshot captured in preceding README pass)",
       "result": "pass",
-      "output": "Initial CONNECTED/STANDBY, confirmed 18 C setpoint, START, cooling trace, STANDBY; screenshot saved to docs/images/simulator.png; server and browser closed."
+      "output": "Initial CONNECTED/STANDBY, confirmed 18 C setpoint, START, cooling trace, STANDBY; screenshot saved to docs/images/simulator.jpg; server and browser closed."
     },
     {
       "check": "Earlier simulator README example and ten-second CSV workflow with physical serial access blocked",
@@ -72,7 +72,7 @@
     {
       "check": "README links, clone URL and distribution documentation",
       "result": "pass",
-      "output": "14 local links/anchors resolve; HTTPS remote verified in preceding README pass; source archive includes exact README and screenshot; wheel metadata contains README."
+      "output": "19 local links/anchors resolve; HTTPS remote verified in preceding README pass; source archive includes exact README and screenshot; wheel metadata contains README."
     },
     {
       "check": "Hardware README examples verified during the preceding documentation pass",
@@ -92,7 +92,12 @@
     {
       "check": "Local documentation links and anchors",
       "result": "pass",
-      "output": "23 local Markdown links/anchors resolve, including all 14 README links; historical prompt quotations excluded."
+      "output": "28 local Markdown links/anchors resolve, including all 19 README links; historical prompt quotations excluded."
+    },
+    {
+      "check": "Visible README GUI showcase and image format",
+      "result": "pass",
+      "output": "Screenshot displayed near the top outside collapsed HTML; controls/chart guide and workflow links added. JPEG signature verified; asset renamed from .png to .jpg without changing bytes. Source distribution includes the JPEG."
     }
   ]
 }

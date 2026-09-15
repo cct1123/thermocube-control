@@ -4,6 +4,29 @@ Control a ThermoCube chiller from a Python experiment: read outlet temperature
 and faults, set a target temperature, and request RUN or STANDBY over RS-232.
 The target unit is **10-400-1D-1-CP-R2-LT-AR-267**.
 
+## GUI showcase
+
+Live temperature readings, a target setpoint, fault/status indicators and a
+temperature history chart in one local browser window.
+
+![ThermoCube GUI: connected and running, outlet cooling toward an 18 °C setpoint, with controls and history chart](docs/images/simulator.jpg)
+
+*Actual simulator screenshot: blue is outlet temperature; yellow is the setpoint.
+The screenshot demonstrates the interface, not physical hardware validation.*
+
+| What you see | How to use it |
+| --- | --- |
+| Connection, RUN/STANDBY and fault indicators | Check connection and reported state before acting; read any displayed fault or error. |
+| Outlet temperature and setpoint | Compare the measured outlet value with the requested target, in °C. |
+| Apply setpoint… / START… / STANDBY… | Review and confirm each action. Hardware controls require permission configured by the calling application. |
+| History chart | Follow outlet and target temperatures over time; missing observations appear as gaps. |
+
+**Start here:** [Install](#1-install-and-check-the-software) →
+[Connect hardware](#2-prepare-the-chiller-and-serial-connection) →
+[Read](#3-first-hardware-use-one-fault-query) →
+[Control](#4-set-a-target-and-control-a-run).
+To explore the interface first, [run the simulator demo](#optional-rehearse-without-hardware).
+
 ## Current status
 
 | Area | Status |
@@ -199,15 +222,6 @@ uv run --locked --extra gui thermocube
 
 Open **[http://127.0.0.1:8050](http://127.0.0.1:8050)**. Enter **18**, confirm
 **Apply setpoint…**, then **START…**. Finish with **STANDBY…** and **Ctrl+C**.
-
-<details>
-<summary>Simulator preview</summary>
-
-![Simulator showing a cooling run toward an 18 °C target](docs/images/simulator.png)
-
-*Simulation does not establish real cooling performance or safe hardware bounds.*
-
-</details>
 
 The `thermocube` launcher always uses simulation. `--port` selects the HTTP port,
 not a chiller's serial port.

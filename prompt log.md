@@ -609,3 +609,9 @@ more focus on using with real hardware
 ```text
 review fix issues commit push  
 ```
+
+## 2026-09-15 — Restore visible README illustrations
+
+```text
+readme missing the illustrative content. e.g. the gui showcase
+```
