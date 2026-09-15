@@ -1,9 +1,9 @@
 {
   "candidate": "TC-REVIEW-0.2.0",
-  "created_at": "2026-09-15T21:57:54.380466+00:00",
+  "created_at": "2026-09-15T22:07:00.662206+00:00",
   "disposition": "NO-GO for write-enabled hardware tests; no physical stage approved or executed",
   "scope": "Listed working-tree source files, excluding this manifest itself. Generated reports, build artifacts, logs, environments and caches are excluded.",
-  "base_commit": "e5f791a3da1112a59651a3292b70b25f32a06772",
+  "base_commit": "82b04ea9471c34d8c338a54943f5bc519ffe288b",
   "runtime": {
     "package_root": "src/thermocube",
     "implementation_modules": [
@@ -22,12 +22,12 @@
     "total_statements": 657,
     "coverage_percent": 94.9771689497717,
     "lint_format_types_dependencies": "pass; records/software-checks.json",
-    "browser_simulation": "README browser check: initial standby, confirmed 18 C setpoint, START, cooling trace, STANDBY; screenshot docs/images/simulator.png; physical serial opening/discovery blocked; temporary server and browser closed.",
+    "browser_simulation": "Preceding README pass: initial standby, confirmed 18 C setpoint, START, cooling trace, STANDBY; screenshot docs/images/simulator.png; physical access blocked; server/browser closed. GUI unchanged in current documentation pass.",
     "host": "Windows / Python 3.12.14 / uv 0.11.2",
     "physical_validation": "not performed",
     "package_build_and_isolated_artifacts": "pass; uv_build distributions, independent uv environments, wheel metadata/entry point/assets, all 65 extracted-source tests and simulation example",
-    "readme_local_links_checked": 12,
-    "readme_examples": "pass; README snippet, included example, 10-second headless standby CSV and overwrite refusal, with physical serial access blocked",
+    "readme_local_links_checked": 14,
+    "readme_examples": "pass; 10 cases across both profiles through real controller/fake serial: individual fault/temperature/setpoint queries, setpoint write/readback, fault refusal, exact bytes, pacing, disconnect; unedited placeholder refuses opening; physical access blocked",
     "packaged_readme": "pass; source README/screenshot bytes match checkout and wheel metadata includes the new README"
   },
   "files": [
@@ -63,8 +63,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 8635,
-      "sha256": "a4f4c0783603bfe71639f80f1ccf4eda7860fb618410d2d29ffa8b6af2d09792"
+      "bytes": 11326,
+      "sha256": "7e28481a45ddffce1fb1f603ea023efeff3905044ba0c200d7cad38565f03da7"
     },
     {
       "path": "docs/HARDWARE_VALIDATION.md",
@@ -78,8 +78,8 @@
     },
     {
       "path": "docs/REVIEW.md",
-      "bytes": 8313,
-      "sha256": "25f413b1c690b2ea8aa6c640ba8ef8fc383ca0ce8d6d1b932b3fa719dcf73e41"
+      "bytes": 8699,
+      "sha256": "9b192710f4aa4606cf056c90512b1a772c09182d6077d3d26cfaac739b4ee3cd"
     },
     {
       "path": "docs/TESTING.md",
@@ -108,8 +108,8 @@
     },
     {
       "path": "prompt log.md",
-      "bytes": 18433,
-      "sha256": "7c4ad9d0ab17b2e28a114bacf822976d50e23d56ddc1028933b315f1e8e4d56e"
+      "bytes": 18532,
+      "sha256": "5c283f885e6be655d5bda724954eba5c3946a6249d45c32aabb9d7e2b581a5eb"
     },
     {
       "path": "pyproject.toml",
@@ -118,8 +118,8 @@
     },
     {
       "path": "records/software-checks.json",
-      "bytes": 2948,
-      "sha256": "c9a995f06458843c69ac9ab8f9ebad6cb99d496b18fc1e5cdedf26081605249b"
+      "bytes": 3342,
+      "sha256": "11c9ab332c49ce16f357daa0aa69a6ce1c46577ad7ab84ce8502a7aa4d04bd06"
     },
     {
       "path": "src/thermocube/__init__.py",

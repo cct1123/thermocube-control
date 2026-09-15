@@ -597,3 +597,9 @@ Goal: a new lab user should quickly understand:
 
 **What is it? → Install → Test → Connect hardware → Use safely**
 ````
+
+## 2026-09-15 — Hardware-focused user guide
+
+```text
+more focus on using with real hardware
+```

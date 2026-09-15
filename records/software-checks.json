@@ -60,19 +60,24 @@
       "output": "Installed console entry point passed with simulation."
     },
     {
-      "check": "README browser workflow with physical serial access blocked",
+      "check": "Simulator browser workflow (screenshot captured in preceding README pass)",
       "result": "pass",
       "output": "Initial CONNECTED/STANDBY, confirmed 18 C setpoint, START, cooling trace, STANDBY; screenshot saved to docs/images/simulator.png; server and browser closed."
     },
     {
-      "check": "README Python snippet, included example and documented ten-second headless CSV workflow with physical serial access blocked",
+      "check": "Earlier simulator README example and ten-second CSV workflow with physical serial access blocked",
       "result": "pass",
       "output": "Both Python examples ran; 10 standby CSV rows; final status printed; existing CSV preserved on FileExistsError."
     },
     {
       "check": "README links, clone URL and distribution documentation",
       "result": "pass",
-      "output": "12 local links/anchors resolve; HTTPS remote HEAD verified; source archive includes exact README and screenshot; wheel metadata contains new README."
+      "output": "14 local links/anchors resolve; HTTPS remote verified in preceding README pass; source archive includes exact README and screenshot; wheel metadata contains README."
+    },
+    {
+      "check": "Hardware README examples through the real controller and fake serial in both profiles",
+      "result": "pass",
+      "output": "10 cases verify one fault/temperature/setpoint query, setpoint write/readback, fault refusal, exact bytes, pacing and zero-TX disconnect. Unedited profile placeholder fails before opening. Physical serial opening/discovery blocked."
     }
   ]
 }
