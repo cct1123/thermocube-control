@@ -1,31 +1,32 @@
 {
   "candidate": "TC-REVIEW-0.2.0",
-  "created_at": "2026-09-15T15:07:26.806860+00:00",
+  "created_at": "2026-09-15T15:26:33.354055+00:00",
   "disposition": "NO-GO for write-enabled hardware tests; no physical stage approved or executed",
   "scope": "Listed working-tree source files, excluding this manifest itself. Generated reports, build artifacts, logs, environments and caches are excluded.",
-  "base_commit": "2dddb0b0814d9565beb8a66502db48bc236dc102",
+  "base_commit": "0cceb66c369b077ef91679af16e3d6b6e85a1568",
   "runtime": {
+    "package_root": "src/thermocube",
     "implementation_modules": [
       "controller",
       "simulator",
       "gui"
     ],
     "python_files": 4,
-    "lines": 1055,
+    "lines": 1057,
     "classes": 6
   },
   "verification": {
     "hardware_access": false,
     "checkout_tests": 65,
-    "covered_statements": 623,
-    "total_statements": 656,
-    "coverage_percent": 94.96951219512195,
+    "covered_statements": 624,
+    "total_statements": 657,
+    "coverage_percent": 94.9771689497717,
     "lint_format_types_dependencies": "pass; records/software-checks.json",
-    "local_document_links_checked": 19,
-    "browser_simulation": "pass: confirmed 18 C setpoint/start/standby, persistent refresh state/history, both chart traces and disconnected display; temporary server and browser closed",
-    "host": "Windows / Python 3.12.14",
+    "local_document_links_checked": 20,
+    "browser_simulation": "Previous simulation browser check recorded at 0cceb66; layout behavior unchanged. Current relocation verified by packaged assets and HTTP/callback tests.",
+    "host": "Windows / Python 3.12.14 / uv 0.11.2",
     "physical_validation": "not performed",
-    "package_build_and_isolated_artifacts": "pass; installed wheel inventory and entry point, smoke checks, all 65 source archive tests and runnable simulation example"
+    "package_build_and_isolated_artifacts": "pass; uv_build distributions, independent uv environments, wheel metadata/entry point/assets, all 65 extracted-source tests and simulation example"
   },
   "files": [
     {
@@ -35,8 +36,8 @@
     },
     {
       "path": ".github/workflows/tests.yml",
-      "bytes": 827,
-      "sha256": "2ba2e4226d0074abdfaafc988e6ae8ab8ab9b748083df6b70a95a1cfe886ae23"
+      "bytes": 905,
+      "sha256": "391e6953d4e832c834472b1e19bddb751ce841430b603fa4eda2eb88b12af830"
     },
     {
       "path": ".gitignore",
@@ -44,24 +45,24 @@
       "sha256": "22b213693fad70c1d56ef6a334fa3090d371ebc0cfe381f9fab1120fb8d2c1ae"
     },
     {
+      "path": ".python-version",
+      "bytes": 5,
+      "sha256": "7b55f8e67b5623c4bef3fa691288da9437d79d3aba156de48d481db32ac7d16d"
+    },
+    {
       "path": "AGENTS.md",
-      "bytes": 1498,
-      "sha256": "75a3cf91aa0eaf9f166b6cd7f7271c5947adaeec84fafab0b279fc532db935b8"
+      "bytes": 1652,
+      "sha256": "5eb0bc3b8931ad1c1419550e6de8b16f2c310ab410dd3f13e9ebd54909101c3d"
     },
     {
       "path": "ARCHITECTURE.md",
-      "bytes": 3602,
-      "sha256": "2eae77524470f5adaa27fc723be9d7a0ca5fcbb96a49bb4111140253ff73f29b"
-    },
-    {
-      "path": "MANIFEST.in",
-      "bytes": 322,
-      "sha256": "c6351692597abeb0e042de9970424da8bd88820990a5f5e3bf19d1064fafc596"
+      "bytes": 4348,
+      "sha256": "75fe9af6041983d39d56c348eeda645f167491b0e61e58df62130a84e32cbf3e"
     },
     {
       "path": "README.md",
-      "bytes": 5998,
-      "sha256": "dc2bf7259bdb3d06715d93cd1fe5e7554d8113e4669631db4f8818c52911edbe"
+      "bytes": 7489,
+      "sha256": "01776510e91c82c146d79ae1096e7c2308c4e4eb6b56aa4291e80949f88fba2a"
     },
     {
       "path": "docs/HARDWARE_VALIDATION.md",
@@ -75,13 +76,13 @@
     },
     {
       "path": "docs/REVIEW.md",
-      "bytes": 6302,
-      "sha256": "661f47fa709eb37974ee697709a5100d44782374e92ce3f0e7e33070098cf831"
+      "bytes": 7287,
+      "sha256": "b859b1142c0e98beffe80062c1e7098bf7c883521b67a1a80f037be5181a7586"
     },
     {
       "path": "docs/TESTING.md",
-      "bytes": 3310,
-      "sha256": "ed708ab5011dbc79c179f76544c82a13ed686573f26180e5e47f24bba56d68b2"
+      "bytes": 3462,
+      "sha256": "8480c673be226a153b299c397a41bb124865058e37f92ba8a96ddcdcd1a48dae"
     },
     {
       "path": "examples/experiment.py",
@@ -100,23 +101,48 @@
     },
     {
       "path": "prompt log.md",
-      "bytes": 17422,
-      "sha256": "bf160a6b52e17c38388ef3b28c69f3d65e4dc330589c1083df04773d2ce5582e"
+      "bytes": 17549,
+      "sha256": "93185bc6fe2b29e4b71cd5ad4430e0c70be4a777484add8e103a25efc2bbc2b7"
     },
     {
       "path": "pyproject.toml",
-      "bytes": 1177,
-      "sha256": "6e867a86c04154e82b5778d4904cdd5ef5409b887024682706b7892d4713f712"
+      "bytes": 1301,
+      "sha256": "ad24727b5ae7505768db5ebc81b389641e7b4af60996127cc5117cf485e74713"
     },
     {
       "path": "records/software-checks.json",
-      "bytes": 1851,
-      "sha256": "f5115c83c9e8aaf8e1ee3d1d86a381ac2bd41797287a451a22a3fa0b59e55c1b"
+      "bytes": 2072,
+      "sha256": "57998e554b41c3652d75bc6f2bb4951b723eb296676d28caac786fe4249b5725"
     },
     {
-      "path": "requirements-lock.txt",
-      "bytes": 877,
-      "sha256": "9153c9cd6d96e35b83a4b22c3e5f35e1856783f4e852e8ebbddc86ec4b879e59"
+      "path": "src/thermocube/__init__.py",
+      "bytes": 351,
+      "sha256": "ccd450e174df62b26a8ec44671defa09b4f24b9f67ff5f46ac2bb9d514aa7e9f"
+    },
+    {
+      "path": "src/thermocube/assets/style.css",
+      "bytes": 1249,
+      "sha256": "d2ac912a6e299448aac5095a0db75b2c32444213edf6c1cae33e70069f87741b"
+    },
+    {
+      "path": "src/thermocube/controller.py",
+      "bytes": 17189,
+      "sha256": "0463bae222342f5c99ab55a3c46e6407af0c00a1d9af4a7dd66b5ed138e722fd"
+    },
+    {
+      "path": "src/thermocube/gui.py",
+      "bytes": 17672,
+      "sha256": "b88b2ccb841d8a65132c08977ccd4edfde17b30f40257fdc87a1386d5657a773"
+    },
+    {
+      "path": "src/thermocube/py.typed",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "src/thermocube/simulator.py",
+      "bytes": 6258,
+      "sha256": "01d8b0de467440d3cc562b194924457b20ab9fb5ef66aee0ce1a81660ae8eb7c"
     },
     {
       "path": "tests/conftest.py",
@@ -139,39 +165,14 @@
       "sha256": "e631bdf053137b1bc37b4a943ebc01dbf31610c12f1d0ee8af1acaa664add68f"
     },
     {
-      "path": "thermocube/__init__.py",
-      "bytes": 289,
-      "sha256": "fec8b768ac4f6bd712a39784d9de7313443d3441a851a29226db2cbb57edfa89"
-    },
-    {
-      "path": "thermocube/assets/style.css",
-      "bytes": 1249,
-      "sha256": "d2ac912a6e299448aac5095a0db75b2c32444213edf6c1cae33e70069f87741b"
-    },
-    {
-      "path": "thermocube/controller.py",
-      "bytes": 17189,
-      "sha256": "0463bae222342f5c99ab55a3c46e6407af0c00a1d9af4a7dd66b5ed138e722fd"
-    },
-    {
-      "path": "thermocube/gui.py",
-      "bytes": 17672,
-      "sha256": "b88b2ccb841d8a65132c08977ccd4edfde17b30f40257fdc87a1386d5657a773"
-    },
-    {
-      "path": "thermocube/py.typed",
-      "bytes": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "path": "thermocube/simulator.py",
-      "bytes": 6258,
-      "sha256": "01d8b0de467440d3cc562b194924457b20ab9fb5ef66aee0ce1a81660ae8eb7c"
-    },
-    {
       "path": "tools/verify_artifacts.py",
-      "bytes": 3666,
-      "sha256": "65674c8ea3470efd377431f59b489ecd3c8f4fd02a20176eaf8fb64d9f8da14e"
+      "bytes": 4800,
+      "sha256": "20a69520a9a3fab9ac6ec3ffc2061d3c5d2c268ea8aa215d0f4c1bc3ea3be690"
+    },
+    {
+      "path": "uv.lock",
+      "bytes": 251499,
+      "sha256": "232d15d6761a814339121df096860b98e845d2b7aaf934cc7a508c59ee05b2c5"
     }
   ]
 }

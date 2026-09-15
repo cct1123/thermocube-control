@@ -6,7 +6,7 @@ No physical port discovery, opening, commands or power operations were performed
 ## Changes
 
 The runtime is reduced from **11 Python files / 2,255 lines / 25 classes** to
-**4 Python files / 1,055 lines / 6 classes**: `controller`, `simulator`, `gui`,
+**4 Python files / 1,057 lines / 6 classes**: `controller`, `simulator`, `gui`,
 plus the package export file. This leaves three implementation modules and two
 immutable result records; no standalone protocol, monitoring or launcher module.
 
@@ -27,6 +27,22 @@ The GUI calls the same public methods as an experiment script. Monitoring, CSV,
 plotting and the application entry point are not imported by the core controller.
 No worker starts on import, construction, connection or GUI creation. The monitor
 never connects/reconnects or owns device shutdown. The caller sequences operations.
+
+## Package layout and uv migration
+
+The package lives under `src/thermocube`. `pyproject.toml` is the version and
+metadata source; the package exposes its installed distribution version.
+`uv_build` replaces setuptools configuration and MANIFEST.in. `uv.lock` replaces
+the former requirements constraints, preserving the previously tested versions.
+Development tools use the standard `dev` dependency group; the GUI remains an
+optional extra. Build/wheel frontend dependencies were removed.
+
+`.python-version` selects Python 3.12 locally. The Windows/Ubuntu 3.11/3.12 CI
+matrix uses uv with a checked lockfile. Wheel and source checks now create
+separate uv environments and use real installations, including for subprocess
+import tests. They no longer insert checkout paths into `sys.path` or inherit
+installed dependencies from the development environment. Hardware behavior and
+its three-module API were not changed by this packaging migration.
 
 ## Retained hardware protections and tradeoffs
 
@@ -57,14 +73,14 @@ provide a hard emergency-stop deadline; an independent physical method is requir
 The rewritten suite covers protocol vectors and exhaustive word/fault cases,
 actual controller I/O through fake serial, state locks, fault preflight, uncertain
 delivery, concurrency, recovery, simulator, monitoring/CSV and Dash/CLI behavior.
-Local results: **65 tests pass; 94.97% statement coverage (623/656 statements)**.
+Local results: **65 tests pass; 94.98% statement coverage (624/657 statements)**.
 Ruff lint/format, mypy and dependency checks pass. The wheel and source archive
 build successfully. Isolated wheel imports, packaged CSS, Dash endpoints and
 headless CSV/shutdown pass; all 65 tests also pass from the extracted source
 archive. Reproduction commands are in [TESTING.md](TESTING.md).
 
-The current GUI is checked through HTTP layout/action/history tests and a
-simulation-only browser check: confirmed 18 C setpoint, START, retained state
+The relocated package passes HTTP layout/action/history and packaged-asset tests.
+Before relocation, a simulation-only browser check covered: confirmed 18 C setpoint, START, retained state
 and history after reload, cooling trace, STANDBY and disconnected/disabled display.
 The temporary server and browser were closed. No physical evidence is claimed.
 

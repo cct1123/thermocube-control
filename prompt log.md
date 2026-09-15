@@ -564,3 +564,9 @@ When complete, run the full validation suite, inspect the final repository for a
 
 Show less
 ````
+
+## 2026-09-15 — Standard Python package and uv
+
+```text
+reorganize the repo as a standard python package. uv management
+```

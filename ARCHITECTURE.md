@@ -1,13 +1,13 @@
 # Architecture
 
-Three implementation modules plus the package export file:
+Three implementation modules and the package export file live under `src/thermocube/`:
 
 | Module | Responsibility |
 | --- | --- |
 | `controller.py` | Synchronous device API, serial I/O, R2 encoding/decoding, `Status`, `Faults`, `SafetyError` |
 | `simulator.py` | Hardware-free device API with a first-order thermal model and fault/link injection |
 | `gui.py` | Optional `Monitor`, CSV/history, Dash UI and simulation launcher |
-| `__init__.py` | Public device/result exports and package version |
+| `__init__.py` | Public device/result exports; version from installed package metadata |
 
 ```mermaid
 flowchart LR
@@ -67,3 +67,16 @@ not recreate the device or worker. Stop the monitor before releasing the device.
 Simulation retains thermal/run state over link loss. It models the software API,
 not serial firmware, pump flow or calibrated thermal performance. The launcher
 (`thermocube` or `python -m thermocube.gui`) always uses simulation.
+
+## Packaging and environments
+
+`pyproject.toml` defines the package version and dependencies, the `gui` extra,
+the `dev` dependency group and the `uv_build` backend. The backend includes the
+package's CSS and typing marker automatically. Its source distribution also
+contains the tests, examples, lockfile, documentation and review evidence.
+
+`uv sync --locked` installs the package from `src/` into `.venv`. Tests import
+that installation; they do not add the source directory to `sys.path`.
+`uv build` creates a source archive and wheel. Artifact checks create independent
+uv environments for the wheel and the extracted source, so child processes cannot
+fall back to the development checkout.

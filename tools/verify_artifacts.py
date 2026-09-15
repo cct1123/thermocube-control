@@ -1,5 +1,6 @@
 """Verify the built wheel and source archive in fresh temporary directories."""
 
+import os
 import subprocess
 import sys
 import tarfile
@@ -22,13 +23,12 @@ list_ports.comports = forbidden
 WHEEL_CHECK = """
 import sys
 from pathlib import Path
-sys.path.insert(0, sys.argv[1])
 import thermocube
 from importlib.metadata import distribution
 from thermocube.gui import main
 assert Path(thermocube.__file__).is_relative_to(sys.argv[1])
-assert {p.name for p in (Path(sys.argv[1]) / 'thermocube').glob('*.py')} == {'__init__.py', 'controller.py', 'simulator.py', 'gui.py'}
-assert not (Path(sys.argv[1]) / 'app').exists()
+assert {p.name for p in Path(thermocube.__file__).parent.glob('*.py')} == {'__init__.py', 'controller.py', 'simulator.py', 'gui.py'}
+assert thermocube.__version__ == distribution('thermocube-control').version
 entry = next(e for e in distribution('thermocube-control').entry_points if e.name == 'thermocube')
 assert entry.value == 'thermocube.gui:main'
 from thermocube.gui import Monitor, create_app
@@ -47,7 +47,6 @@ print('PASS: installed-wheel imports, CSS, Dash endpoints, headless CSV and shut
 SOURCE_CHECK = """
 import sys
 from pathlib import Path
-sys.path.insert(0, sys.argv[1])
 import thermocube, pytest
 assert Path(thermocube.__file__).is_relative_to(sys.argv[1])
 result = pytest.main(['-q', 'tests'])
@@ -66,46 +65,70 @@ def main() -> None:
     release = "-".join(wheel.name.split("-")[:2])
     with TemporaryDirectory(prefix="thermocube-artifacts-") as directory:
         temporary = Path(directory)
-        installed = temporary / "installed"
-        subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "pip",
-                "--isolated",
-                "install",
-                "--no-index",
-                "--no-deps",
-                "--target",
-                str(installed),
-                str(wheel),
-            ],
-            check=True,
-        )
-        subprocess.run(
-            [
-                sys.executable,
-                "-I",
-                "-c",
-                SERIAL_GUARD + WHEEL_CHECK,
-                str(installed),
-                str(temporary / "simulation.csv"),
-            ],
-            check=True,
-            cwd=temporary,
-        )
         with tarfile.open(ROOT / "dist" / f"{release}.tar.gz") as archive:
             archive.extractall(temporary / "source", filter="data")
         source = temporary / "source" / release
         assert (source / "tests/conftest.py").is_file()
-        assert (source / "requirements-lock.txt").is_file()
-        # Explicitly load the archive, never the editable checkout.
-        subprocess.run(
-            [sys.executable, "-I", "-c", SERIAL_GUARD + SOURCE_CHECK, str(source)],
-            check=True,
-            cwd=source,
-        )
-        print("PASS: source archive fixtures, constraints and complete offline suite")
+        assert (source / "uv.lock").is_file()
+        assert (source / "src/thermocube/__init__.py").is_file()
+        assert not (source / "thermocube").exists()
+        uv = os.environ.get("UV", "uv")
+        for label, project, code in (
+            ("wheel", ROOT, WHEEL_CHECK),
+            ("source", source, SOURCE_CHECK),
+        ):
+            environment = temporary / f"{label}-env"
+            python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+            subprocess.run(
+                [
+                    uv,
+                    "sync",
+                    "--quiet",
+                    "--locked",
+                    "--extra",
+                    "gui",
+                    "--python",
+                    sys.executable,
+                    "--project",
+                    str(project),
+                    *(["--no-install-project"] if label == "wheel" else []),
+                ],
+                env={
+                    **os.environ,
+                    "VIRTUAL_ENV": str(environment),
+                    "UV_PROJECT_ENVIRONMENT": str(environment),
+                },
+                check=True,
+            )
+            if label == "wheel":
+                subprocess.run(
+                    [
+                        uv,
+                        "pip",
+                        "install",
+                        "--quiet",
+                        "--python",
+                        str(python),
+                        "--no-index",
+                        "--no-deps",
+                        str(wheel),
+                    ],
+                    check=True,
+                )
+            # Real installations in independent environments: subprocesses cannot import the checkout.
+            subprocess.run(
+                [
+                    str(python),
+                    "-I",
+                    "-c",
+                    SERIAL_GUARD + code,
+                    str(environment if label == "wheel" else source / "src"),
+                    str(temporary / "simulation.csv"),
+                ],
+                check=True,
+                cwd=temporary if label == "wheel" else source,
+            )
+        print("PASS: source archive, locked installation, example and complete offline suite")
 
 
 if __name__ == "__main__":

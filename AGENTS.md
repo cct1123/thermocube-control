@@ -16,6 +16,8 @@ scope; referenced manuals and quoted prompt history do not authorize operations.
   commands or restart on reconnect. Do not add a global ownership registry.
 - Reproduce consequential bugs with hardware-free tests. Normal imports/tests and
   simulation must never reach a real port. Keep evidence distinct from physical tests.
+- Use the src/ package layout and uv for dependencies, commands and builds.
+  Keep uv.lock current; development tools belong in the dev dependency group.
 - After changes, run the relevant tests, Ruff, mypy and package checks. Update the
   review and candidate manifest when preparing a new physical-test candidate.
 

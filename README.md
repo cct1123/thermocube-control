@@ -11,11 +11,29 @@ cannot be guaranteed. Hardware use requires the [staged validation procedure](do
 
 ## Install and use
 
-Python 3.11+:
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) once, then:
 
 ~~~powershell
-python -m venv .venv
-.\.venv\Scripts\python -m pip install -e .
+uv sync --locked
+uv run --locked python examples/experiment.py
+~~~
+
+uv creates `.venv` and installs the package from `src/` in editable mode. Python
+3.11+ is supported; `.python-version` selects 3.12 for local development. Runtime
+requirements, the optional `gui` extra and the `dev` dependency group live in
+`pyproject.toml`; `uv.lock` records resolved versions and distribution hashes.
+
+~~~text
+src/thermocube/    controller.py, simulator.py, gui.py, assets, package exports
+tests/            hardware-free behavior tests
+examples/         runnable simulation integration
+docs/             protocol, review and hardware validation
+inputs/           reference manual and provenance
+records/          source manifest and validation evidence
+tools/            distribution verification
+pyproject.toml    package metadata, dependencies, build and tool configuration
+uv.lock           reproducible dependency resolution
+.python-version   local development Python version
 ~~~
 
 The simulator follows the same device-operation API:
@@ -92,10 +110,9 @@ remain independent of optional logging. Standard Python logging on
 Install the GUI only when needed:
 
 ~~~powershell
-.\.venv\Scripts\python -m pip install -e '.[gui]'
-.\.venv\Scripts\python -m thermocube.gui
+uv run --locked --extra gui thermocube
 # Optional browser-free simulation with CSV:
-.\.venv\Scripts\python -m thermocube.gui --headless --duration 10 --csv simulation.csv
+uv run --locked thermocube --headless --duration 10 --csv simulation.csv
 ~~~
 
 The launcher always uses simulation. To embed the GUI in approved laboratory
@@ -129,3 +146,18 @@ Neither STOP delivery, process exit nor disconnect is an emergency-stop guarante
 
 Import devices from `thermocube`, optional monitoring/UI from `thermocube.gui`,
 and use `status()` for observations. User requests remain in [prompt log.md](prompt%20log.md).
+
+## Development
+
+~~~powershell
+uv sync --locked --extra gui
+uv run --locked --extra gui pytest
+uv run --locked ruff check src tests tools examples
+uv run --locked mypy
+uv build
+~~~
+
+Use `uv add PACKAGE` for runtime dependencies, `uv add --optional gui PACKAGE`
+for GUI dependencies, and `uv add --dev PACKAGE` for development tools. Commit
+both `pyproject.toml` and `uv.lock` when dependencies change. `uv lock --upgrade-package PACKAGE` intentionally upgrades one dependency. See [the complete validation
+commands](docs/TESTING.md) for format, coverage and installed-artifact checks.

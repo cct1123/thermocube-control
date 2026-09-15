@@ -1,6 +1,6 @@
 # Hardware-free validation
 
-Candidate 0.2.0: **65 tests pass**, with **94.97% statement coverage** (623/656).
+Candidate 0.2.0: **65 tests pass**, with **94.98% statement coverage** (624/657).
 Ruff, mypy, dependency and build checks pass. The isolated wheel smoke checks
 and all 65 tests from the extracted source archive also pass.
 
@@ -31,24 +31,29 @@ Old tests of removed registries, factories, queue IDs and policy objects were de
 ## Repeat
 
 ~~~powershell
-.\.venv\Scripts\python -m pip install -c requirements-lock.txt -e '.[gui,dev]'
-.\.venv\Scripts\python -m ruff check thermocube tests tools examples
-.\.venv\Scripts\python -m ruff format --check thermocube tests tools examples
-.\.venv\Scripts\python -m mypy thermocube
-.\.venv\Scripts\python -m pytest -q --cov=thermocube --cov-fail-under=90 --cov-report=term-missing --cov-report=json:records/coverage.json --junitxml=records/tests.xml
-.\.venv\Scripts\python -m pip check
-.\.venv\Scripts\python -m build --no-isolation
-.\.venv\Scripts\python tools/verify_artifacts.py
+uv sync --locked --extra gui
+uv lock --check
+uv run --locked ruff check src tests tools examples
+uv run --locked ruff format --check src tests tools examples
+uv run --locked mypy
+uv run --locked --extra gui pytest -q --cov=thermocube --cov-fail-under=90 --cov-report=term-missing --cov-report=json:records/coverage.json --junitxml=records/tests.xml
+uv pip check
+uv build
+uv run --locked --extra gui python tools/verify_artifacts.py
 ~~~
 
 Keep only the candidate wheel in dist/. The artifact checker installs it offline
-in a fresh temporary directory, tests its imports/assets/headless CLI, then runs
-the complete suite from the extracted source archive. Temporary copies are removed.
+in its own uv environment, tests its metadata/imports/assets/headless CLI, then
+syncs the extracted source archive into another environment and runs the complete
+suite and example. The lockfile supplies dependencies for both environments.
+No source-path injection or inherited site-packages can mask packaging errors.
+Temporary environments are removed when the check finishes.
 
 Results live in [REVIEW.md](REVIEW.md), [static checks](../records/software-checks.json)
 and the [source manifest](../records/candidate-manifest.json). Raw test/build output
 is generated under records/ and excluded from Git, as are dist/, caches and logs.
-The constraints file records tested versions; it is not a hash-locked download list.
+`uv.lock` replaces the requirements constraints file and includes distribution
+hashes. `--locked` rejects dependency changes until the lockfile is regenerated.
 
 Local checks use Windows/Python 3.12.14. The CI matrix declares Windows/Ubuntu and
 Python 3.11/3.12; only actually observed runs should be claimed. None of these

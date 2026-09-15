@@ -11,14 +11,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
+          version: "0.11.2"
           python-version: ${{ matrix.python }}
-      - run: python -m pip install -c requirements-lock.txt -e ".[gui,dev]"
-      - run: python -m ruff check thermocube tests tools examples
-      - run: python -m ruff format --check thermocube tests tools examples
-      - run: python -m mypy thermocube
-      - run: python -m pytest -q --cov=thermocube --cov-fail-under=90
-      - run: python -m pip check
-      - run: python -m build --no-isolation
-      - run: python tools/verify_artifacts.py
+          enable-cache: true
+      - run: uv sync --locked --extra gui
+      - run: uv run --locked ruff check src tests tools examples
+      - run: uv run --locked ruff format --check src tests tools examples
+      - run: uv run --locked mypy
+      - run: uv run --locked --extra gui pytest -q --cov=thermocube --cov-fail-under=90
+      - run: uv pip check
+      - run: uv build
+      - run: uv run --locked --extra gui python tools/verify_artifacts.py

@@ -2,47 +2,62 @@
   "candidate": "TC-REVIEW-0.2.0",
   "date": "2026-09-15",
   "hardware_access": false,
+  "host": "Windows / Python 3.12.14 / uv 0.11.2",
   "results": [
     {
-      "command": ".venv/Scripts/python --version",
+      "command": "uv --version",
       "exit_code": 0,
-      "output": "Python 3.12.14"
+      "output": "uv 0.11.2"
     },
     {
-      "command": ".venv/Scripts/python -m ruff check thermocube tests tools examples",
+      "command": "uv sync --locked --extra gui",
+      "exit_code": 0,
+      "output": "Project installed from src; dependency environment synchronized."
+    },
+    {
+      "command": "uv lock --check",
+      "exit_code": 0,
+      "output": "Resolved 45 packages; lock is current."
+    },
+    {
+      "command": "uv run --locked ruff check src tests tools examples",
       "exit_code": 0,
       "output": "All checks passed!"
     },
     {
-      "command": ".venv/Scripts/python -m ruff format --check thermocube tests tools examples",
+      "command": "uv run --locked ruff format --check src tests tools examples",
       "exit_code": 0,
       "output": "10 files already formatted"
     },
     {
-      "command": ".venv/Scripts/python -m mypy thermocube",
+      "command": "uv run --locked mypy",
       "exit_code": 0,
       "output": "Success: no issues found in 4 source files"
     },
     {
-      "command": ".venv/Scripts/python -m pytest -q --cov=thermocube --cov-fail-under=90 --cov-report=term-missing --cov-report=json:records/coverage.json --junitxml=records/tests.xml",
+      "command": "uv run --locked --extra gui pytest -q --cov=thermocube --cov-fail-under=90 --cov-report=term-missing --cov-report=json:records/coverage.json --junitxml=records/tests.xml",
       "exit_code": 0,
-      "output": "65 passed; 94.97% coverage (623/656 statements)"
+      "output": "65 passed; 94.98% coverage (624/657 statements)"
     },
     {
-      "command": ".venv/Scripts/python -m pip check",
+      "command": "uv pip check",
       "exit_code": 0,
-      "output": "No broken requirements found."
+      "output": "All installed packages are compatible."
     },
     {
-      "command": ".venv/Scripts/python -m build --no-isolation",
+      "command": "uv build",
       "exit_code": 0,
-      "output": "Built thermocube_control-0.2.0.tar.gz and thermocube_control-0.2.0-py3-none-any.whl."
+      "output": "Built thermocube_control-0.2.0.tar.gz and thermocube_control-0.2.0-py3-none-any.whl with uv_build."
     },
     {
-      "command": ".venv/Scripts/python tools/verify_artifacts.py",
+      "command": "uv run --locked --extra gui python tools/verify_artifacts.py",
       "exit_code": 0,
-      "output": "Installed-wheel module inventory, entry point, imports, CSS, Dash endpoints, headless CSV and shutdown passed. Extracted source suite: 65 passed; simulation example passed."
+      "output": "Independent uv environments passed installed-wheel metadata, imports, CSS, Dash endpoints, headless CSV/shutdown, all 65 extracted-source tests and the example."
+    },
+    {
+      "command": "uv run --locked --no-dev thermocube --headless --duration 0.1",
+      "exit_code": 0,
+      "output": "Installed console entry point passed with simulation."
     }
-  ],
-  "environment_note": "Sandbox pytest attempts failed on temporary-directory permissions; the complete suite and artifact checks passed outside that sandbox with physical serial opening and enumeration blocked."
+  ]
 }

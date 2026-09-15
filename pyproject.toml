@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.11.2,<0.12"]
+build-backend = "uv_build"
 
 [project]
 name = "thermocube-control"
-dynamic = ["version"]
+version = "0.2.0"
 description = "Small synchronous ThermoCube R2 controller with optional monitoring and Dash UI"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -12,19 +12,21 @@ dependencies = ["pyserial>=3.5,<4"]
 
 [project.optional-dependencies]
 gui = ["dash>=4.4,<5"]
-dev = ["pytest>=9,<10", "pytest-cov>=7,<8", "ruff>=0.16,<0.17", "mypy>=2,<3", "types-pyserial", "build", "wheel"]
+
+[dependency-groups]
+dev = ["pytest>=9,<10", "pytest-cov>=7,<8", "ruff>=0.16,<0.17", "mypy>=2,<3", "types-pyserial"]
 
 [project.scripts]
 thermocube = "thermocube.gui:main"
 
-[tool.setuptools.packages.find]
-include = ["thermocube*"]
-
-[tool.setuptools.dynamic]
-version = {attr = "thermocube.__version__"}
-
-[tool.setuptools.package-data]
-thermocube = ["py.typed", "assets/*.css"]
+[tool.uv.build-backend]
+module-name = "thermocube"
+source-include = [
+    "uv.lock", ".python-version", "AGENTS.md", "ARCHITECTURE.md", 'prompt\ log.md',
+    "docs/*.md", "examples/*.py", "tests/*.py", "tools/*.py",
+    "records/candidate-manifest.json", "records/software-checks.json",
+    "inputs/README.md", "inputs/*.pdf",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -40,7 +42,7 @@ ignore = ["E501"]
 
 [tool.mypy]
 python_version = "3.11"
-files = ["thermocube"]
+files = ["src/thermocube"]
 check_untyped_defs = true
 disallow_untyped_defs = true
 warn_unused_ignores = true
