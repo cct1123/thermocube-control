@@ -40,7 +40,6 @@ class Monitor:
         self._lock = threading.Lock()
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
-        self._file: TextIO | None = None
 
     @property
     def latest(self) -> Status | None:
@@ -66,22 +65,25 @@ class Monitor:
         with self._lock:
             if self._thread is not None or self._stop.is_set():
                 raise RuntimeError("Create a new monitor after stopping")
+            output = None
             if self._csv_path is not None:
-                self._file = Path(self._csv_path).open("x", newline="", encoding="utf-8")
+                output = Path(self._csv_path).open("x", newline="", encoding="utf-8")
             try:
-                self._thread = threading.Thread(target=self._run, name="thermocube-monitor")
+                self._thread = threading.Thread(
+                    target=self._run, args=(output,), name="thermocube-monitor"
+                )
                 self._thread.start()
             except Exception:
                 self._thread = None
                 self._stop.set()
-                if self._file:
-                    self._file.close()
+                if output:
+                    output.close()
                 raise
 
-    def _run(self) -> None:
+    def _run(self, output: TextIO | None) -> None:
         try:
-            writer = csv.writer(self._file) if self._file else None
-            if writer:
+            writer = csv.writer(output) if output else None
+            if writer and output:
                 writer.writerow(
                     (
                         "timestamp_utc",
@@ -97,8 +99,7 @@ class Monitor:
                         "error",
                     )
                 )
-                assert self._file is not None
-                self._file.flush()
+                output.flush()
             while not self._stop.is_set():
                 sample, error = None, None
                 started = datetime.now(UTC)
@@ -117,7 +118,7 @@ class Monitor:
                         self._latest = sample
                     self._error = error
                     self._history.append((stamp, sample))
-                if writer:
+                if writer and output:
                     faults = sample.faults if sample else None
                     writer.writerow(
                         (
@@ -134,8 +135,7 @@ class Monitor:
                             error,
                         )
                     )
-                    assert self._file is not None
-                    self._file.flush()
+                    output.flush()
                 # No catch-up polling after a slow sample.
                 elapsed = time.monotonic() - started_tick
                 self._stop.wait(max(0, self._interval - elapsed))
@@ -145,9 +145,9 @@ class Monitor:
                 self._error = f"Monitor stopped: {type(exc).__name__}: {exc}"
             self._stop.set()  # Includes CSV failure: no further state-asserting queries.
         finally:
-            if self._file:
+            if output:
                 try:
-                    self._file.close()
+                    output.close()
                 except OSError as exc:
                     with self._lock:
                         self._error = f"CSV close failed: {exc}"
@@ -174,14 +174,13 @@ class Monitor:
 
 def presentation(
     sample: Status | None,
+    device: ThermoCube | Simulator,
     *,
-    connected: bool,
-    queries: bool,
-    control: bool,
     error: str | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     current = now or datetime.now(UTC)
+    connected = device.is_connected
     fresh = bool(sample and connected and 0 <= (current - sample.timestamp).total_seconds() <= 3.5)
     names = list(sample.faults.active) if sample else []
     if sample and sample.faults.unknown_mask:
@@ -212,8 +211,14 @@ def presentation(
         if names
         else ("No reported faults" if fresh else "Fault state unknown / stale"),
         "fault_class": "fault alarm" if names else "fault",
-        "disabled": not (complete and queries and control and not names and not error),
-        "stop_disabled": not (connected and control),
+        "disabled": not (
+            complete
+            and device.queries_enabled
+            and device.control_enabled
+            and not names
+            and not error
+        ),
+        "stop_disabled": not device.control_enabled,
     }
 
 
@@ -288,13 +293,7 @@ def create_app(monitor: Monitor) -> Dash:
         Input("refresh", "n_intervals"),
     )
     def refresh(_: int) -> tuple[Any, ...]:
-        view = presentation(
-            monitor.latest,
-            connected=device.is_connected,
-            queries=device.queries_enabled,
-            control=device.control_enabled,
-            error=monitor.error,
-        )
+        view = presentation(monitor.latest, device, error=monitor.error)
         history = monitor.history
         figure = {
             "data": [
@@ -378,13 +377,7 @@ def create_app(monitor: Monitor) -> Dash:
             elif trigger == "confirmation.submit_n_clicks" and isinstance(pending, dict):
                 operation = pending.get("operation")
                 if operation in ("apply", "start"):
-                    view = presentation(
-                        monitor.latest,
-                        connected=device.is_connected,
-                        queries=device.queries_enabled,
-                        control=device.control_enabled,
-                        error=monitor.error,
-                    )
+                    view = presentation(monitor.latest, device, error=monitor.error)
                     if view["disabled"]:
                         raise SafetyError(
                             "Fresh fault-free monitoring and write permission are required"

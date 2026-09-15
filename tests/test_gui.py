@@ -57,10 +57,7 @@ def test_layout_refresh_and_creation_do_not_connect_or_start_monitor():
 
 def test_gui_confirmation_calls_public_api_and_cancel_does_nothing():
     with Simulator() as device, Monitor(device) as monitor:
-        deadline = time.monotonic() + 2
-        while monitor.latest is None:
-            assert time.monotonic() < deadline
-            time.sleep(0.01)
+        wait_for(lambda: monitor.latest is not None)
         app = create_app(monitor)
         client = app.server.test_client()
         request_callback(app, client, "pending.data", "connect.n_clicks")
@@ -130,22 +127,15 @@ def test_presentation_stale_future_fault_and_legacy_states():
         for seconds in (-5, 5):
             view = presentation(
                 replace(sample, timestamp=sample.timestamp + timedelta(seconds=seconds)),
-                connected=True,
-                queries=True,
-                control=True,
+                device,
                 now=sample.timestamp,
             )
             assert view["disabled"] and view["temperature"] == "—"
-        legacy = presentation(
-            replace(sample, reported_run=None),
-            connected=True,
-            queries=True,
-            control=True,
-            now=sample.timestamp,
-        )
+        with Simulator(profile="legacy-r2") as legacy_device:
+            legacy = presentation(legacy_device.status(), legacy_device)
         assert "UNVERIFIED" in legacy["run"]
         device.inject_faults(128)
-        view = presentation(device.status(), connected=True, queries=False, control=True)
+        view = presentation(device.status(), device)
         assert "unknown bits" in view["faults"] and view["fault_class"] == "fault alarm"
         assert view["disabled"] and not view["stop_disabled"]
 
@@ -175,10 +165,7 @@ def test_cli_reports_failed_acquisition_and_closes(monkeypatch):
 
 def test_gui_refresh_gets_background_history_without_polling_device():
     with Simulator() as device, Monitor(device) as monitor:
-        deadline = time.monotonic() + 2
-        while monitor.latest is None:
-            assert time.monotonic() < deadline
-            time.sleep(0.01)
+        wait_for(lambda: monitor.latest is not None)
         app = create_app(monitor)
         client = app.server.test_client()
         before = monitor.latest

@@ -14,16 +14,45 @@ from decimal import ROUND_HALF_UP, Decimal
 import serial
 
 CONTROL, SETPOINT, FAULTS, TEMPERATURE = 0, 1, 8, 9
-PROFILES = ("legacy-r2", "thermocube-ii-m5")
+FAULT_NAMES = {
+    "legacy-r2": ("tank_level_low", "fan_fail", None, "pump_fail", "rtd_open", "rtd_short"),
+    "thermocube-ii-m5": (
+        "tank_level_low",
+        "fan_fail",
+        "flow_fault",
+        "pump_fail",
+        "leak_detected",
+        "rtd_fault",
+    ),
+}
 
 
 @dataclass(frozen=True)
 class Faults:
     raw: int
     profile: str
-    active: tuple[str, ...]
-    unknown_mask: int
-    standby: bool | None
+
+    def __post_init__(self) -> None:
+        if type(self.raw) is not int or not 0 <= self.raw <= 255:
+            raise ValueError("Fault mask must be a byte")
+        if self.profile not in FAULT_NAMES:
+            raise ValueError("Unknown fault profile")
+
+    @property
+    def active(self) -> tuple[str, ...]:
+        return tuple(
+            name
+            for bit, name in enumerate(FAULT_NAMES[self.profile])
+            if name and self.raw & (1 << bit)
+        )
+
+    @property
+    def unknown_mask(self) -> int:
+        return self.raw & (0xC4 if self.profile == "legacy-r2" else 0x80)
+
+    @property
+    def standby(self) -> bool | None:
+        return None if self.profile == "legacy-r2" else bool(self.raw & 0x40)
 
     @property
     def has_fault(self) -> bool:
@@ -73,9 +102,7 @@ def decode_temperature(data: bytes, unit: str = "C") -> float:
     raise ValueError("Unit must be C or F")
 
 
-def validate_limits(bounds: tuple[float, float] | None) -> tuple[float, float] | None:
-    if bounds is None:
-        return None
+def validate_limits(bounds: tuple[float, float]) -> tuple[float, float]:
     if not isinstance(bounds, (tuple, list)) or len(bounds) != 2:
         raise ValueError("limits_c must contain a minimum and maximum")
     low, high = (to_celsius(v) for v in bounds)
@@ -90,28 +117,6 @@ def setpoint_payload(value: float, unit: str, limits: tuple[float, float]) -> by
     if not all(limits[0] <= v <= limits[1] for v in (requested, decode_temperature(data))):
         raise ValueError(f"Requested and quantized setpoint must be within {limits} C")
     return data
-
-
-def decode_faults(data: bytes, profile: str) -> Faults:
-    if type(data) is not bytes or len(data) != 1:
-        raise ConnectionError("Fault reply must contain exactly one byte")
-    if profile not in PROFILES:
-        raise ValueError("Select a known fault profile explicitly")
-    mapping = {0: "tank_level_low", 1: "fan_fail", 3: "pump_fail"}
-    if profile == "legacy-r2":
-        mapping.update({4: "rtd_open", 5: "rtd_short"})
-        standby, known = None, 0
-    else:
-        mapping.update({2: "flow_fault", 4: "leak_detected", 5: "rtd_fault"})
-        standby, known = bool(data[0] & 64), 64
-    known |= sum(1 << bit for bit in mapping)
-    return Faults(
-        data[0],
-        profile,
-        tuple(name for bit, name in sorted(mapping.items()) if data[0] & (1 << bit)),
-        data[0] & (~known & 255),
-        standby,
-    )
 
 
 QUERY_ACK = "QUERIES ASSERT REMOTE AND RUN STATE"
@@ -132,7 +137,10 @@ class Status:
     setpoint_c: float | None
     faults: Faults
     requested_run: bool | None
-    reported_run: bool | None
+
+    @property
+    def reported_run(self) -> bool | None:
+        return None if self.faults.standby is None else not self.faults.standby
 
 
 class ThermoCube:
@@ -148,7 +156,7 @@ class ThermoCube:
     ) -> None:
         if not isinstance(port, str) or not port.strip() or "://" in port:
             raise ValueError("Specify a local serial port, not a URL")
-        if profile is not None and profile not in PROFILES:
+        if profile is not None and profile not in FAULT_NAMES:
             raise ValueError("Unknown fault profile")
         if type(binary_framing_confirmed) is not bool:
             raise ValueError("Framing confirmation must be a boolean")
@@ -159,7 +167,7 @@ class ThermoCube:
             raise ValueError("R2 command interval must be at least 350 ms")
         self._port_name, self._profile = port.strip(), profile
         self._framing = binary_framing_confirmed
-        self._limits = validate_limits(limits_c)
+        self._limits = None if limits_c is None else validate_limits(limits_c)
         self._timeout, self._interval = timeout, command_interval
         self._serial: serial.Serial | None = None
         self._lock = threading.RLock()
@@ -277,9 +285,11 @@ class ThermoCube:
             assert self._serial is not None
             try:
                 buffered = self._serial.in_waiting
-            except OSError as exc:
+            except BaseException as exc:
                 self._quarantine()
-                raise ConnectionError(f"Cannot verify the reopened stream: {exc}") from exc
+                if isinstance(exc, OSError):
+                    raise ConnectionError(f"Cannot verify the reopened stream: {exc}") from exc
+                raise
             if buffered:
                 raise SafetyError("Unexpected buffered bytes; stream remains uncertain")
             self._uncertain = False
@@ -384,7 +394,7 @@ class ThermoCube:
         with self._lock:
             self._require_query()
             assert self._profile is not None
-            faults = decode_faults(self._exchange(FAULTS), self._profile)
+            faults = Faults(self._exchange(FAULTS)[0], self._profile)
             mismatch = faults.standby is not None and faults.standby == self._run
             if faults.has_fault or mismatch:
                 self._armed = False  # Existing write permission still permits explicit STOP.
@@ -427,8 +437,7 @@ class ThermoCube:
             faults = self.read_faults()
             temperature = self.read_temperature() if self._armed else None
             setpoint = self.read_setpoint() if self._armed else None
-            reported = None if faults.standby is None else not faults.standby
-            return Status(stamp, temperature, setpoint, faults, self._run, reported)
+            return Status(stamp, temperature, setpoint, faults, self._run)
 
     def __enter__(self) -> ThermoCube:
         self.connect()

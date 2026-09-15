@@ -8,11 +8,10 @@ import time
 from datetime import UTC, datetime
 
 from thermocube.controller import (
-    PROFILES,
+    FAULT_NAMES,
     Faults,
     SafetyError,
     Status,
-    decode_faults,
     decode_temperature,
     encode_temperature,
     setpoint_payload,
@@ -39,11 +38,9 @@ class Simulator:
                 raise ValueError("Simulation timing must be finite")
         if time_constant <= 0 or timeout <= 0 or delay < 0:
             raise ValueError("Invalid simulation timing")
-        if profile not in PROFILES:
+        if profile not in FAULT_NAMES:
             raise ValueError("Unknown fault profile")
         limits = validate_limits(limits_c)
-        if limits is None:
-            raise ValueError("Simulation requires setpoint bounds")
         self._limits, self._profile = limits, profile
         self._temperature, self._ambient = to_celsius(initial_c), to_celsius(ambient_c)
         encode_temperature(initial_c)
@@ -77,8 +74,7 @@ class Simulator:
             self._connected = False  # Device thermal/run state persists across link loss.
 
     def inject_faults(self, raw: int) -> None:
-        if type(raw) is not int or not 0 <= raw <= 255:
-            raise ValueError("Fault mask must be a byte")
+        Faults(raw, self._profile)
         with self._lock:
             self._advance()
             self._fault_byte = raw
@@ -95,7 +91,7 @@ class Simulator:
         raw = self._fault_byte
         if self._profile == "thermocube-ii-m5":
             raw = (raw & ~64) | (0 if self._running else 64)
-        return decode_faults(bytes([raw]), self._profile)
+        return Faults(raw, self._profile)
 
     def _advance(self) -> None:
         now = time.monotonic()
@@ -175,7 +171,6 @@ class Simulator:
                 None if faults.has_fault else self._setpoint,
                 faults,
                 self._running,
-                None if faults.standby is None else not faults.standby,
             )
 
     def __enter__(self) -> Simulator:

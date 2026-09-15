@@ -5,99 +5,79 @@
   "host": "Windows / Python 3.12.14 / uv 0.11.2",
   "results": [
     {
-      "command": "uv --version",
-      "exit_code": 0,
-      "output": "uv 0.11.2"
-    },
-    {
       "command": "uv sync --locked --extra gui",
       "exit_code": 0,
-      "output": "Project installed from src; dependency environment synchronized."
+      "output": "Project and locked GUI/dev dependencies synchronized."
     },
     {
       "command": "uv lock --check",
       "exit_code": 0,
-      "output": "Resolved 45 packages; lock is current."
+      "output": "45 packages resolved; lockfile current."
     },
     {
       "command": "uv run --locked ruff check src tests tools examples",
       "exit_code": 0,
-      "output": "All checks passed!"
+      "output": "All checks passed."
     },
     {
       "command": "uv run --locked ruff format --check src tests tools examples",
       "exit_code": 0,
-      "output": "10 files already formatted"
+      "output": "10 files already formatted."
     },
     {
       "command": "uv run --locked mypy",
       "exit_code": 0,
-      "output": "Success: no issues found in 4 source files"
+      "output": "No issues in 4 source files."
     },
     {
       "command": "uv run --locked --extra gui pytest -q --cov=thermocube --cov-fail-under=90 --cov-report=term-missing --cov-report=json:records/coverage.json --junitxml=records/tests.xml",
       "exit_code": 0,
-      "output": "81 passed; 95.96% coverage (642/669 statements)"
+      "output": "86 passed; 96.54% coverage (641/664 statements). Physical serial opening and discovery blocked."
     },
     {
       "command": "uv pip check",
       "exit_code": 0,
-      "output": "All installed packages are compatible."
+      "output": "All installed packages compatible."
     },
     {
       "command": "uv build",
       "exit_code": 0,
-      "output": "Built thermocube_control-0.2.0.tar.gz and thermocube_control-0.2.0-py3-none-any.whl with uv_build."
+      "output": "Built thermocube_control-0.2.0.tar.gz and thermocube_control-0.2.0-py3-none-any.whl."
     },
     {
       "command": "uv run --locked --extra gui python tools/verify_artifacts.py",
       "exit_code": 0,
-      "output": "Independent uv environments passed installed-wheel metadata, imports, CSS, Dash endpoints, headless CSV/shutdown, all 81 extracted-source tests and the example."
+      "output": "Independent uv environments passed wheel metadata/imports/CSS/Dash endpoints/headless CSV, all 86 extracted-source tests and the simulator example."
     },
     {
-      "command": "uv run --locked --no-dev thermocube --headless --duration 0.1",
+      "command": "git diff --check",
       "exit_code": 0,
-      "output": "Installed console entry point passed with simulation."
+      "output": "No whitespace errors."
     },
     {
-      "check": "Simulator browser workflow (screenshot captured in preceding README pass)",
+      "check": "Recovery-check regression reproduction",
       "result": "pass",
-      "output": "Initial CONNECTED/STANDBY, confirmed 18 C setpoint, START, cooling trace, STANDBY; screenshot saved to docs/images/simulator.jpg; server and browser closed."
+      "output": "Two failures reproduced KeyboardInterrupt/SystemExit leaving the port open and permissions enabled; OSError control case passed. All three pass after the fix, with zero transmitted bytes."
     },
     {
-      "check": "Earlier simulator README example and ten-second CSV workflow with physical serial access blocked",
+      "check": "Documentation and GUI showcase",
       "result": "pass",
-      "output": "Both Python examples ran; 10 standby CSV rows; final status printed; existing CSV preserved on FileExistsError."
+      "output": "All 30 local documentation links/anchors resolve, including 19 in README; historical prompt quotations excluded. Screenshot is expanded near the top; JPEG signature valid. GUI layout and screenshot bytes unchanged."
     },
     {
-      "check": "README links, clone URL and distribution documentation",
+      "check": "Repository migration review",
       "result": "pass",
-      "output": "19 local links/anchors resolve; HTTPS remote verified in preceding README pass; source archive includes exact README and screenshot; wheel metadata contains README."
+      "output": "No remaining decoder/profile aliases, stored CSV handle, redundant result constructor arguments, obsolete image paths or stale validation totals in current source/tests/docs. Three implementation modules, 6 classes, 1,067 runtime lines and 7 stored result fields."
     },
     {
-      "check": "Hardware README examples verified during the preceding documentation pass",
+      "check": "Earlier browser evidence",
       "result": "pass",
-      "output": "10 cases verify one fault/temperature/setpoint query, setpoint write/readback, fault refusal, exact bytes, pacing and zero-TX disconnect. Unedited profile placeholder fails before opening. Physical serial opening/discovery blocked."
+      "output": "Screenshot captured in the preceding README pass: standby, confirmed 18 C target, START, cooling trace, STANDBY; server/browser closed. This pass uses HTTP/callback tests, not a new browser capture."
     },
     {
-      "check": "Regression reproduction before fixes",
-      "result": "confirmed",
-      "output": "11 failures and 1 passing control case reproduced interrupted serial cleanup/recovery, monitor startup CSV/stop failures and incorrect legacy simulator run reporting."
-    },
-    {
-      "check": "Review regression coverage after fixes",
+      "check": "Earlier hardware-guide evidence",
       "result": "pass",
-      "output": "16 added cases pass in the 81-test suite: interrupted open/read/write/close, cancellation during failed-open cleanup, no replay or implicit STOP after interrupted RUN delivery, worker construction/startup cleanup, and both simulator fault profiles."
-    },
-    {
-      "check": "Local documentation links and anchors",
-      "result": "pass",
-      "output": "28 local Markdown links/anchors resolve, including all 19 README links; historical prompt quotations excluded."
-    },
-    {
-      "check": "Visible README GUI showcase and image format",
-      "result": "pass",
-      "output": "Screenshot displayed near the top outside collapsed HTML; controls/chart guide and workflow links added. JPEG signature verified; asset renamed from .png to .jpg without changing bytes. Source distribution includes the JPEG."
+      "output": "Ten README example cases passed against fake serial in the preceding documentation pass. Hardware examples unchanged; no physical session approved or performed."
     }
   ]
 }

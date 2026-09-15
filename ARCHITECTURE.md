@@ -47,7 +47,7 @@ Uncertain I/O closes/disarms, never retries, and requires acknowledged physical
 recovery before rearming. Faults inhibit queries/start/setpoint while existing
 write permission still allows an explicit STOP.
 
-Cancellation during serial opening, reading, writing or closing also requires
+Cancellation during serial opening, reading, writing, closing or recovery checks requires
 recovery. The driver attempts to close the handle and propagates KeyboardInterrupt
 or SystemExit; it sends no cleanup commands. A failed open still releases any
 acquired handle, and cancellation during that cleanup is not swallowed.
@@ -57,10 +57,18 @@ first query and never make old temperatures appear fresh. M5 reports standby;
 legacy run intent remains unverified. Raw and unknown fault bits stay visible.
 The simulator also leaves reported run state absent for the legacy profile.
 
+`Faults(raw, profile)` derives `active`, `unknown_mask` and `standby` from the raw
+byte. `Status(timestamp, temperature_c, setpoint_c, faults, requested_run)` derives
+`reported_run` from its faults. Read these attributes as before; computed values
+are no longer constructor arguments or `dataclasses.asdict()` fields. Code that
+creates observations must use these constructors; the separate fault-decoder
+helper is removed. CSV still writes all of these values explicitly.
+
 ## Optional consumers and shutdown
 
 `Monitor` is an explicitly started, single-use worker. It samples an already
 connected/armed device, stores bounded history and optionally flushes CSV rows.
+The worker receives its CSV handle directly and closes it when polling ends.
 Errors create gaps. CSV failure ends polling. The application owns connection,
 recovery and its audit/abort requirements. A stop timeout leaves I/O ownership
 with the caller until the worker has joined.

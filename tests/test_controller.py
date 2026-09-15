@@ -10,12 +10,11 @@ import pytest
 import serial
 from conftest import arm
 
-from thermocube import SafetyError, ThermoCube
+from thermocube import Faults, SafetyError, ThermoCube
 from thermocube.controller import (
     CONTROL_ACK,
     QUERY_ACK,
     RECOVERY_ACK,
-    decode_faults,
     decode_temperature,
     encode_temperature,
     setpoint_payload,
@@ -134,6 +133,17 @@ def test_status_is_fault_first_without_merging_old_values(hardware):
     assert faulted.temperature_c is None and faulted.setpoint_c is None
     assert faulted.faults.has_fault and not device.queries_enabled
     assert len(wire.calls) == 4
+
+
+@pytest.mark.parametrize("reply,error", [(b"", TimeoutError), (b"\x40\n", ConnectionError)])
+def test_fault_reply_must_be_exactly_one_byte(hardware, reply, error):
+    device, wire, _ = hardware
+    arm(device)
+    wire.replies.append(reply)
+    with pytest.raises(error):
+        device.read_faults()
+    assert not device.is_connected and device.needs_recovery
+    assert [data for _, data in wire.calls] == [b"\x88"]
 
 
 @pytest.mark.parametrize("run", [False, True])
@@ -312,6 +322,23 @@ def test_partial_reads_and_explicit_recovery(hardware):
     device.arm_queries(run=False, acknowledgement=QUERY_ACK)
     wire.read_delay = 0
     assert device.read_temperature() == 25
+
+
+@pytest.mark.parametrize("error", [OSError, KeyboardInterrupt, SystemExit])
+def test_failed_recovery_check_closes_and_disarms(hardware, monkeypatch, error):
+    device, wire, _ = hardware
+    arm(device, control=True)
+
+    def fail(_):
+        raise error("recovery interrupted")
+
+    monkeypatch.setattr(type(wire), "in_waiting", property(fail))
+    expected = ConnectionError if error is OSError else error
+    with pytest.raises(expected, match="recovery interrupted"):
+        device.confirm_recovery(RECOVERY_ACK)
+    assert not device.is_connected and not wire.is_open
+    assert not device.queries_enabled and not device.control_enabled
+    assert device.needs_recovery and wire.calls == []
 
 
 def test_late_buffered_bytes_prevent_any_new_command(hardware):
@@ -507,11 +534,10 @@ def test_input_range_and_quantized_bounds():
     for value in (None, "10", True, float("nan"), float("inf"), -1, 6554):
         with pytest.raises(ValueError):
             encode_temperature(value, "F")
-    for bounds in ((1, 1), (2, 1), (True, 3), (0, float("inf")), (1,), "1,2"):
+    for bounds in (None, (1, 1), (2, 1), (True, 3), (0, float("inf")), (1,), "1,2"):
         with pytest.raises(ValueError):
             validate_limits(bounds)
     assert validate_limits([0, 40]) == (0, 40)
-    assert validate_limits(None) is None
     with pytest.raises(ValueError):
         setpoint_payload(10.03, "C", (0, 10.04))
     for unit in ("K", "c", ""):
@@ -524,7 +550,7 @@ def test_input_range_and_quantized_bounds():
 
 def test_every_fault_byte_preserves_unknown_bits_and_profile_meanings():
     for raw in range(256):
-        legacy = decode_faults(bytes([raw]), "legacy-r2")
+        legacy = Faults(raw, "legacy-r2")
         assert legacy.raw == raw and legacy.unknown_mask == raw & 0xC4
         assert legacy.standby is None
         for bit, name in (
@@ -535,13 +561,14 @@ def test_every_fault_byte_preserves_unknown_bits_and_profile_meanings():
             (5, "rtd_short"),
         ):
             assert (name in legacy.active) == bool(raw & (1 << bit))
-        m5 = decode_faults(bytes([raw]), "thermocube-ii-m5")
+        m5 = Faults(raw, "thermocube-ii-m5")
         assert m5.raw == raw and m5.unknown_mask == raw & 128 and m5.standby == bool(raw & 64)
         for bit, name in ((2, "flow_fault"), (4, "leak_detected"), (5, "rtd_fault")):
             assert (name in m5.active) == bool(raw & (1 << bit))
-    assert not decode_faults(b"\x40", "thermocube-ii-m5").has_fault
-    assert decode_faults(b"\x40", "legacy-r2").has_fault
+    assert not Faults(0x40, "thermocube-ii-m5").has_fault
+    assert Faults(0x40, "legacy-r2").has_fault
     with pytest.raises(ValueError):
-        decode_faults(b"\x00", "guessed")
-    with pytest.raises(ConnectionError):
-        decode_faults(b"\x00\x00", "legacy-r2")
+        Faults(0, "guessed")
+    for raw in (-1, 256, True, b"\x00", None):
+        with pytest.raises(ValueError):
+            Faults(raw, "legacy-r2")

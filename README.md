@@ -32,7 +32,7 @@ To explore the interface first, [run the simulator demo](#optional-rehearse-with
 | Area | Status |
 | --- | --- |
 | Driver | Version **0.2.0** implements serial connection, temperature/fault queries, setpoints and start/stop controls. |
-| Software validation | **81 tests pass; 95.96% coverage** on Windows / Python 3.12.14. Lint, types and package checks pass. [Evidence](docs/REVIEW.md). |
+| Software validation | **86 tests pass; 96.54% coverage** on Windows / Python 3.12.14. Lint, types and package checks pass. [Evidence](docs/REVIEW.md). |
 | Physical validation | **Compatibility is unconfirmed. No hardware stage is approved or completed.** The fault profile, framing, wiring and operating limits still need confirmation for the actual unit. |
 
 The workflow below prepares an approved hardware session. Follow the

@@ -615,3 +615,9 @@ review fix issues commit push
 ```text
 readme missing the illustrative content. e.g. the gui showcase
 ```
+
+## 2026-09-15 — Review, prune and simplify
+
+```text
+review prune simplify commit push
+```

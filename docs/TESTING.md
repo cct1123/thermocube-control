@@ -1,8 +1,8 @@
 # Hardware-free validation
 
-Candidate 0.2.0: **81 tests pass**, with **95.96% statement coverage** (642/669).
+Candidate 0.2.0: **86 tests pass**, with **96.54% statement coverage** (641/664).
 Ruff, mypy, dependency and build checks pass. The isolated wheel smoke checks
-and all 81 tests from the extracted source archive also pass.
+and all 86 tests from the extracted source archive also pass.
 
 Tests exercise public operations against an independent literal-byte serial peer.
 The real controller's pyserial construction, opening, pacing, read/write and error
@@ -20,17 +20,13 @@ Coverage includes:
 - Concurrent callers, STOP followed by disconnect, monotonic pacing with both
   a deterministic clock and real elapsed time over fake serial.
 - Interrupted open/read/write/close, cancellation during failed-open cleanup,
-  and interrupted RUN delivery without replay or implicit STOP.
+  interrupted recovery checks, and RUN delivery without replay or implicit STOP.
 - Simulator heat/cool/standby behavior and retained state across link loss.
 - Legacy simulation preserves requested state without inventing reported run state.
 - Optional monitor lifecycle, bounded history, CSV gaps/failures and no hidden reconnect.
 - Failed worker construction/startup closes CSV and leaves stop() safe.
 - Dash HTTP layout/callbacks/assets, confirmation, stale/future data and backend locks.
 - Core and headless monitoring without GUI dependencies; CLI success/failure shutdown.
-
-The new suite groups exhaustive codec checks into meaningful scenarios instead
-of reporting hundreds of parameterized bit cases as separate engineering tests.
-Old tests of removed registries, factories, queue IDs and policy objects were deleted.
 
 ## Repeat
 
