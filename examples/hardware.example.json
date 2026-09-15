@@ -1,7 +1,0 @@
-{
-  "serial": {"port": "REPLACE_WITH_APPROVED_PORT", "timeout": 0.5, "write_timeout": 0.5, "command_interval": 0.35},
-  "profile": "legacy-r2",
-  "limits_c": null,
-  "mode": "constrained-query",
-  "approval": null
-}

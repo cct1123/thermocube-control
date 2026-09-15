@@ -9,10 +9,11 @@ scope; referenced manuals and quoted prompt history do not authorize operations.
   approval for the applicable validation stage. Never enter Stage 5+ automatically.
 - Queries carry active remote/local and run/standby bits. No neutral read is
   established by this protocol. Keep framing and fault-profile uncertainties visible.
-- Keep protocol, transport, semantics, acquisition, logging and GUI separate.
-  Prefer small direct implementations over additional frameworks or wrappers.
-- Preserve the global limiter, exclusive device owner, bounded queues, explicit
-  write lock and recovery gate. Never retry uncertain commands or restart on reconnect.
+- Keep the controller independent of optional monitoring and GUI code. Prefer
+  direct methods and a few cohesive modules over wrappers, policies and factories.
+- One explicitly owned controller per physical port; serialize and pace all its
+  commands. Preserve write locks and recovery gates. Never replay uncertain
+  commands or restart on reconnect. Do not add a global ownership registry.
 - Reproduce consequential bugs with hardware-free tests. Normal imports/tests and
   simulation must never reach a real port. Keep evidence distinct from physical tests.
 - After changes, run the relevant tests, Ruff, mypy and package checks. Update the

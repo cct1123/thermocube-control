@@ -1,172 +1,100 @@
-# Critical pre-hardware engineering review
+# Simplification review — 0.2.0
 
-**Disposition: NO-GO for write-enabled hardware testing.**
-Candidate **0.1.1**, 2026-09-14, for ThermoCube
-**10-400-1D-1-CP-R2-LT-AR-267**. No physical port discovery, open, query, write,
-power operation or other hardware access was performed. Stage 5+ remains closed
-pending explicit human approval and the physical criteria below.
+**Disposition: offline candidate; NO-GO for write-enabled hardware testing.**
+No physical port discovery, opening, commands or power operations were performed.
 
-## Findings and corrections
+## Changes
 
-The 0.1.0 baseline passed 618 tests, but targeted review reproduced eleven failing
-safety/data-integrity cases. Those statistics had overstated the breadth of
-failure-path assurance. The following defects are corrected in 0.1.1.
+The runtime is reduced from **11 Python files / 2,255 lines / 25 classes** to
+**4 Python files / 1,055 lines / 6 classes**: `controller`, `simulator`, `gui`,
+plus the package export file. This leaves three implementation modules and two
+immutable result records; no standalone protocol, monitoring or launcher module.
 
-| Finding | Consequence before correction | Correction / regression evidence |
-| --- | --- | --- |
-| Queued stop could be cancelled by later disconnect/disarm | The requested standby never reached the device before link release | Preserve stop ahead of later shutdown requests; deduplicate pending shutdown; reject new work once close begins; test in-flight setpoint → stop → disconnect |
-| Faults were polled last; rearming bypassed the setpoint fault lock | Two extra state-asserting queries occurred before detecting faults; a setpoint could be written while a known fault persisted | Query faults first; end faulty/mismatched snapshot immediately; fault preflight before every setpoint write and start |
-| Complete replies/writes returned after deadlines were accepted | Late data could be treated as current; delivery timing remained ambiguous | Check actual completion time, normalize pyserial timeout exception, quarantine and never replay |
-| Quarantine belonged only to one transport instance | Replacing the object could bypass recovery requirements | Quarantine shares the per-port state with pacing/ownership; replacement remains locked |
-| GUI freshness used a shared snapshot timestamp | Fresh fault data made old RTD/setpoint values appear fresh | Check each observation timestamp; missing, old or future values cannot enable start/setpoint |
-| Logging failure left active polling running; cancellation was absent from CSV | Device state continued to be asserted without audit evidence; cancelled requests disappeared from logs | Pause polling/reopen on audit failure; bounded worker audit queue records queued/cancelled outcomes while preserving explicitly permitted shutdown |
-| Metadata/configuration were not stable | Caller metadata could replace session identity; a second file read could log a different config than the one used | Protect reserved identity fields; parse configuration once; immutable approval/profile/limits; copy mutable run-state lists |
-| Import isolation and headless exit were weak | Fixtures did not protect pre-test imports; failed acquisition could exit successfully | Install test guards before collection, add fresh-process import check; failed headless runs exit with failure and close resources |
+All serial and value-codec logic lives in controller.py. Supported device methods
+construct commands directly; the generic command builder and custom protocol
+exception are gone. Monitoring, CSV and the launcher live with the GUI and import
+Dash only when creating the UI. Unused run-state properties and the direct Plotly
+API/dependency were removed. Plotly remains a dependency of Dash itself.
 
-The relevant regressions are in
-[test_review_regressions.py](../tests/test_review_regressions.py), with revised
-literal transaction expectations in the driver tests. These are software proofs
-for stated scenarios, not physical guarantees.
+Removed global ownership/port registries, configuration and approval objects,
+typing-interface wrappers, mode enums, event buffers, command/result queues,
+automatic reconnect, cached-snapshot merging, the separate app package and JSON
+hardware configuration. Operation/safety notes are consolidated into the README,
+architecture and hardware procedure instead of duplicating them across documents.
+Waitress and its type-stub dependency are removed from the optional local GUI.
 
-## What was simplified
+The GUI calls the same public methods as an experiment script. Monitoring, CSV,
+plotting and the application entry point are not imported by the core controller.
+No worker starts on import, construction, connection or GUI creation. The monitor
+never connects/reconnects or owns device shutdown. The caller sequences operations.
 
-Removed redundant PROJECT.md, STATE.md, docs/PLAN.md, the accumulated agent ledger,
-initialization-only checks and duplicate test README. The latest review now
-contains the disposition; one Stage 0–7 document owns the physical gate.
-AGENTS.md is concise contributor guidance. Prompt history and manual provenance
-remain intact.
+## Retained hardware protections and tradeoffs
 
-Removed repeated version literals using one package version source, eliminated
-duplicate configuration file reads, reused the shutdown-operation allowlist, and
-made artifact verification select the actual candidate rather than a fixed old
-version. No feature expansion, plugin registry, database, task scheduler, device
-manager or new service framework was added.
+- Build commands from documented bit fields; LOW before HIGH, unsigned tenths F.
+- Validate inputs and both requested/quantized setpoints against caller-supplied bounds.
+- Require explicit profile/framing and query-state acknowledgement before querying.
+- Keep writes locked until separately enabled; fault preflight before setpoint/start.
+- Serialize whole operations and pace every attempted write by at least 350 ms.
+- Reject short/extra/late/implausible data; close/disarm uncertain streams and never replay.
+- Reopening never rearms. Recovery requires actual physical stream/state verification.
+- Return fresh observations or errors; do not refresh stale temperatures with a fault timestamp.
+- Preserve raw/unknown faults; distinguish reported M5 state from unverified legacy intent.
 
-Publication cleanup consolidates this review under docs/, removes session-specific
-contributor instructions and keeps generated reports/builds out of Git. Artifact
-verification now runs from tools/ in self-cleaning temporary directories and is
-part of CI. Source archives include the referenced review, manual, prompt history,
-verification script and concise evidence. Text uses consistent LF line endings.
+The global registry was deliberately removed. Simultaneous ownership relies on
+OS serial exclusivity and cooperating callers; the laboratory application must own
+one controller per port. Replacement objects do not inherit uncertainty latches:
+every new owner must re-establish the stream and physical state. No hidden process
+policy pretends to prove these conditions. Approval records belong to the operator.
 
-The small Device and SerialLike typing protocols remain: they separate consumers
-from device semantics and fake/real serial I/O. The seven backend modules plus
-Dash/CLI composition are appropriate boundaries, not speculative abstractions.
-Serial validation at both semantic and transport boundaries is retained deliberately.
+Standard Python DEBUG logging provides optional wire traces. Optional CSV failure
+stops the monitor; it cannot disable unrelated calls made by an experiment owner.
+The owner must implement its audit/abort requirements. Logging is not mandatory
+for importing or using the controller. Python, the OS and USB adapters cannot
+provide a hard emergency-stop deadline; an independent physical method is required.
 
-## Protocol review
+## Validation
 
-The supplied M5 manual was re-extracted and printed pp. 22–23 visually inspected.
-Tables 2–5 and note 2 agree with the codec's bit layout, LOW-before-HIGH order,
-0.1 F representation and M5 fault profile. Command examples are derived from
-the bit structure, not scattered opcodes.
+The rewritten suite covers protocol vectors and exhaustive word/fault cases,
+actual controller I/O through fake serial, state locks, fault preflight, uncertain
+delivery, concurrency, recovery, simulator, monitoring/CSV and Dash/CLI behavior.
+Local results: **65 tests pass; 94.97% statement coverage (623/656 statements)**.
+Ruff lint/format, mypy and dependency checks pass. The wheel and source archive
+build successfully. Isolated wheel imports, packaged CSS, Dash endpoints and
+headless CSV/shutdown pass; all 65 tests also pass from the extracted source
+archive. Reproduction commands are in [TESTING.md](TESTING.md).
 
-A query is **not guaranteed non-mutating**. Bit 5=0 requests chiller-to-host
-data, but bit 7 still selects remote/local and bit 6 still selects run/standby.
-There is no documented preserve-state encoding. In particular:
+The current GUI is checked through HTTP layout/action/history tests and a
+simulation-only browser check: confirmed 18 C setpoint, START, retained state
+and history after reload, cooling trace, STANDBY and disconnected/disabled display.
+The temporary server and browser were closed. No physical evidence is claimed.
 
-| Query state | Fault / RTD / setpoint bytes | Active request |
-| --- | --- | --- |
-| Remote, standby | 88 / 89 / 81 | Select REMOTE and assert STANDBY |
-| Remote, run | C8 / C9 / C1 | Select REMOTE and assert RUN |
-| Local-bit alternatives | Bit 7 cleared | Transfer/select LOCAL; no neutrality guarantee |
+The 0.1.1 count of 640 tests is not carried forward: hundreds of bit permutations
+are now grouped into exhaustive tests, and internal-architecture tests were removed.
+The final pass also replaces generic-builder cases with literal vectors executed
+through the public API in both RUN and STANDBY. Exhaustive temperature/fault tests
+remain. Fresh-process tests forbid GUI imports while running headless monitoring.
+Test count alone is not evidence of hardware safety.
 
-A0 followed by stale C9 can request RUN again. Query-only approval must explicitly
-cover the chosen state assertion, even though setpoint/start/stop methods are
-locked. A response cannot establish the pre-query state or demonstrate that
-physical cooling/flow is safe. A running load must not be put into standby just
-to follow a convenient test script.
+## Physical gate
 
-Temperature roundtrips exercise all unsigned words but do not establish that the
-hardware supports that numerical range or signed HEX encoding. Requested and
-quantized setpoints are checked against approved bounds. The broad read plausibility
-window is a malformed-data guard, not a safety envelope or overtemperature interlock.
+A query is **not guaranteed non-mutating**. Bits 7 and 6 remain active when bit 5
+selects a reply. Standby queries 88/89/81 select REMOTE/STANDBY; C8/C9/C1 assert
+REMOTE/RUN. A stale RUN query after A0 may request RUN again. Local-bit alternatives
+also change control semantics and cannot be described as neutral.
 
-The user-required legacy fault mapping (0 tank, 1 fan, 3 pump, 4 RTD open, 5 RTD
-short; C4 unknown) conflicts with M5 (2 flow, 4 leak, 5 RTD, 6 standby; 80 unknown).
-Both explicit profiles are retained. Legacy has no documented run feedback in
-this contract. Model/firmware identification must resolve which is applicable.
+The supplied ThermoCube II M5 manual may not describe the exact 10-400/-AR/-267
+controller. Its fault mapping conflicts with the requested legacy map; both remain
+explicit profiles. The HEX newline note conflicts with binary examples. Signed HEX,
+the requested eight-byte buffer limit, actual wiring, thermal limits, pump/keypad
+and restart behavior remain unvalidated. No framing trials or automatic profile
+selection were added. See the unchanged source analysis in [PROTOCOL.md](PROTOCOL.md).
 
-M5's HEX newline note still conflicts with its binary examples. No terminator
-trial or OS-dependent assumption is permitted; this candidate supports raw binary
-only. The requested 8-byte capacity is not substantiated by M5 and remains a
-conservative single-outstanding-request constraint.
+[HARDWARE_VALIDATION.md](HARDWARE_VALIDATION.md) retains Stage 0–7 hold points:
+inspection → zero-TX opening → one standby fault query → RTD comparison → setpoint
+read → separate human write approval → small approved setpoint change → bounded
+remote start/stop test. Use direct calls, not the monitor or GUI, during these stages.
+The previous software architecture is not physical evidence for the refactor.
 
-## Architecture, limitations and verification
-
-The driver locks complete semantic operations; transport pacing/ownership is
-global per normalized physical port within this process. POSIX also requests
-exclusive opening; Windows serial handles exclude another ordinary opener.
-Do not rely on this against a second uncontrolled program or alternate hardware
-path. The limiter uses actual monotonic time for physical paths and at least
-350 ms after each attempted write completes. Stop shares that limit.
-
-Read/write return deadlines are enforced, but Python cannot forcibly bound an
-OS call or USB delivery. A conservative snapshot-plus-stop I/O budget is 4.9 s,
-excluding OS scheduling, opening, logging and adapter delays. This is not an
-emergency-stop guarantee. Independent physical shutdown remains necessary.
-Opening can glitch RTS/DTR despite requested values; this is why the first
-connection test uses an isolated adapter. [pyserial API](https://pyserial.readthedocs.io/en/latest/pyserial_api.html).
-
-One independent worker owns acquisition, semantic requests, CSV and bounded
-history. GUI callbacks render cached values and enqueue work. CSV flushes do not
-guarantee survival of power failure. A stalled filesystem or OS call can still
-delay the worker; it is not a safety controller. Audit failure stops polling
-because polling itself commands state.
-
-Simulation is a useful API test model of heat/cool approach, standby relaxation,
-faults/delays and link lifecycle. It is not evidence of real thermal dynamics,
-firmware retries, pump behavior or electrical timing. Independent byte fakes
-exercise the production driver separately.
-
-Offline checkout results: **640 passed; 93% statement coverage**
-(1,198/1,284 statements). Ruff lint/format and mypy pass. Counts include many
-parameterized cases; they do not substitute for the review or physical tests.
-The 0.1.1 wheel and source archive build successfully. The isolated installed
-wheel passes import, Dash/CSS, simulated headless CSV and shutdown checks;
-the extracted source archive independently passes **640 tests**.
-Dependency checks pass. Serial opening and enumeration are blocked in these tests.
-Source hashes are in the [candidate manifest](../records/candidate-manifest.json);
-the [test map](TESTING.md) describes scope, evidence and reproduction.
-
-At the time of the local review, the configured CI matrix had not run remotely;
-local results are Windows/Python
-3.12.14. Current GUI evidence is HTTP callbacks/presentation/assets; previous
-interactive browser testing applied to 0.1.0. No physical test or long hardware
-soak is claimed. No current application worker or automation is left running.
-
-## Remaining physical sequence and write criteria
-
-[HARDWARE_VALIDATION.md](HARDWARE_VALIDATION.md) is the exact procedure:
-
-0. Inspect unit/controller, wiring, cable topology, adapter/settings, fluid/load
-   state and independent abort method; zero protocol commands.
-1. Approved isolated adapter open/close, then attached lifecycle only if safe;
-   zero application writes and observed control-line behavior.
-2. After framing/profile confirmation and safe physical standby establishment,
-   send 88 once, expecting one fault byte.
-3. Compare that fault byte with the panel, then send 89 once for LOW/HIGH RTD
-   data and compare within a predeclared display/quantization tolerance.
-4. Send 81 once for setpoint readback; record the initial setpoint and raw word.
-5. Hold for human approval tied to passing evidence, exact candidate and actual
-   limits/target/run-duration/abort plan. Never advance here automatically.
-6. One small approved standby setpoint change: 88 preflight, A1 LOW HIGH, 81 readback.
-7. Separately approved bounded start/stop: 88, E0, approved RUN-context
-   C8 as specified, A0, then standby-context 88; observe the real behavior.
-
-Stages 2–4 allow three queries total, no background acquisition, no retries or
-cleanup TX. Stage 7's complete proposed sequence has five commands. Every stage
-is a hold point; unexplained data or state ends further traffic.
-
-**GO for writes only when** the exact controller/profile/framing/pinout is
-confirmed, Stage 0–4 evidence passes, no faults/unknown bits or stale/uncertain
-stream remains, audit logging works, the approved target and bounds are safe
-for the actual unit/fluid/load, independent shutdown and restart/pump/keypad
-behavior are established, and the human approves Stage 5–7 scope.
-
-**Current result: NO-GO.** Those physical facts and approvals remain outstanding.
-Do not clear alarms, power-cycle, alter profiles to fit a reply or widen bounds
-to obtain a passing result. Link-loss, power-loss/-AR, extended acquisition and
-recovery tests require separate finite scope after this sequence.
-
-The review stops here for human approval. All user requests are preserved in
-[prompt log.md](../prompt%20log.md).
+Writes remain NO-GO until the actual controller/profile/framing/wiring is confirmed,
+Stage 0–4 evidence passes, safe bounds and an independent abort method are established,
+and the human explicitly approves the finite Stage 5–7 scope.

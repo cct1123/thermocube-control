@@ -1,18 +1,31 @@
 {
-  "candidate": "TC-REVIEW-0.1.1",
-  "created_at": "2026-09-14T21:19:40.704602+00:00",
+  "candidate": "TC-REVIEW-0.2.0",
+  "created_at": "2026-09-15T15:07:26.806860+00:00",
   "disposition": "NO-GO for write-enabled hardware tests; no physical stage approved or executed",
-  "scope": "Files in the containing Git commit, excluding this manifest itself. Generated reports, build artifacts, logs, environments and caches are excluded.",
+  "scope": "Listed working-tree source files, excluding this manifest itself. Generated reports, build artifacts, logs, environments and caches are excluded.",
+  "base_commit": "2dddb0b0814d9565beb8a66502db48bc236dc102",
+  "runtime": {
+    "implementation_modules": [
+      "controller",
+      "simulator",
+      "gui"
+    ],
+    "python_files": 4,
+    "lines": 1055,
+    "classes": 6
+  },
   "verification": {
     "hardware_access": false,
-    "checkout_tests": 640,
-    "covered_statements": 1198,
-    "total_statements": 1284,
-    "coverage_percent": 93.30218068535825,
+    "checkout_tests": 65,
+    "covered_statements": 623,
+    "total_statements": 656,
+    "coverage_percent": 94.96951219512195,
     "lint_format_types_dependencies": "pass; records/software-checks.json",
-    "local_document_links_checked": 26,
+    "local_document_links_checked": 19,
+    "browser_simulation": "pass: confirmed 18 C setpoint/start/standby, persistent refresh state/history, both chart traces and disconnected display; temporary server and browser closed",
     "host": "Windows / Python 3.12.14",
-    "physical_validation": "not performed"
+    "physical_validation": "not performed",
+    "package_build_and_isolated_artifacts": "pass; installed wheel inventory and entry point, smoke checks, all 65 source archive tests and runnable simulation example"
   },
   "files": [
     {
@@ -22,8 +35,8 @@
     },
     {
       "path": ".github/workflows/tests.yml",
-      "bytes": 831,
-      "sha256": "ecb71e83ef2be977834fa573d0ea2f55ff9135a916f80d8247021f392c894ee7"
+      "bytes": 827,
+      "sha256": "2ba2e4226d0074abdfaafc988e6ae8ab8ab9b748083df6b70a95a1cfe886ae23"
     },
     {
       "path": ".gitignore",
@@ -32,78 +45,48 @@
     },
     {
       "path": "AGENTS.md",
-      "bytes": 1429,
-      "sha256": "bcc41b27ba352f1e13582e841bfb25bd827c0c27b47408bf2004f07a9a0f82c9"
+      "bytes": 1498,
+      "sha256": "75a3cf91aa0eaf9f166b6cd7f7271c5947adaeec84fafab0b279fc532db935b8"
     },
     {
       "path": "ARCHITECTURE.md",
-      "bytes": 7934,
-      "sha256": "ba9d5531e39cf4833b2f0966484c8670ce9ef284c04d1b70603a157273aa8c26"
+      "bytes": 3602,
+      "sha256": "2eae77524470f5adaa27fc723be9d7a0ca5fcbb96a49bb4111140253ff73f29b"
     },
     {
       "path": "MANIFEST.in",
-      "bytes": 324,
-      "sha256": "261e5a6b7f5b502fe2f71001cfa1c667c16e60b49958344e1b493611cf634fd2"
+      "bytes": 322,
+      "sha256": "c6351692597abeb0e042de9970424da8bd88820990a5f5e3bf19d1064fafc596"
     },
     {
       "path": "README.md",
-      "bytes": 2563,
-      "sha256": "f907bb0319cee118032cebb8163b4118562d5577d9f53e0328bb296d82824f1b"
-    },
-    {
-      "path": "app/__init__.py",
-      "bytes": 83,
-      "sha256": "249294a4d7d75c4a933465b1388f30239c2c0a75324c174e92d97e8b0973c52f"
-    },
-    {
-      "path": "app/assets/style.css",
-      "bytes": 2907,
-      "sha256": "24685be46568638627e6a93c2d42cd8e706af25cb9250d6f283a1bfff75693ab"
-    },
-    {
-      "path": "app/cli.py",
-      "bytes": 4159,
-      "sha256": "c3706b80ea8a49aa39f3b2ae91107875771e94a83f0595de2c34458f1d8cd828"
-    },
-    {
-      "path": "app/dash_app.py",
-      "bytes": 15351,
-      "sha256": "5bb4e5963e3e708fdfd05b34e834c42e1e5c052edfab884d1ebf033f76dcdc49"
+      "bytes": 5998,
+      "sha256": "dc2bf7259bdb3d06715d93cd1fe5e7554d8113e4669631db4f8818c52911edbe"
     },
     {
       "path": "docs/HARDWARE_VALIDATION.md",
-      "bytes": 12395,
-      "sha256": "ab8aef56a1dd85bbf80fdbbc505a9b93f9a231db97808b53e97aef8bad20044b"
-    },
-    {
-      "path": "docs/OPERATIONS.md",
-      "bytes": 5675,
-      "sha256": "976e718a8052f7182d59dc970bdae3916ef2d02c2e10c1f9a33f25edacbcd4c2"
+      "bytes": 12780,
+      "sha256": "a81606ba85ca4c3dd86da665c1732638cbce385f075615035a958a77acdbe1d4"
     },
     {
       "path": "docs/PROTOCOL.md",
-      "bytes": 15238,
-      "sha256": "87379a8157c55112e21e4f857a5d7866ae43fffb07d042c55ad8130ce01139a6"
+      "bytes": 15582,
+      "sha256": "6598349497e712fc6dc72955b78ca192fe1bc95a5216009bc41f9a7d79589808"
     },
     {
       "path": "docs/REVIEW.md",
-      "bytes": 11574,
-      "sha256": "3d4b2b40001e4871e7a2b0b5292268f213c4e26da63ec5e2bc605f6ebacfdce8"
-    },
-    {
-      "path": "docs/SAFETY.md",
-      "bytes": 5908,
-      "sha256": "1518a1da5375502ba1e9aa944682b13a0d1fb2ed79b93e64e1d77f3731c5d0ad"
+      "bytes": 6302,
+      "sha256": "661f47fa709eb37974ee697709a5100d44782374e92ce3f0e7e33070098cf831"
     },
     {
       "path": "docs/TESTING.md",
-      "bytes": 4807,
-      "sha256": "f2e2c7a1202a9c59dd69bacfbf63af20ed718f1e7d8d9cefec9f8556e9c891cd"
+      "bytes": 3310,
+      "sha256": "ed708ab5011dbc79c179f76544c82a13ed686573f26180e5e47f24bba56d68b2"
     },
     {
-      "path": "examples/hardware.example.json",
-      "bytes": 216,
-      "sha256": "d2600335029794424a0c466bb25d02a1280d62e935e25f544ac2c68105470f32"
+      "path": "examples/experiment.py",
+      "bytes": 491,
+      "sha256": "1b8c1a7b66c3644c0b4a1d73c579096cf54347d141d0ba8277b7a261ffefabe1"
     },
     {
       "path": "inputs/README.md",
@@ -117,88 +100,63 @@
     },
     {
       "path": "prompt log.md",
-      "bytes": 11650,
-      "sha256": "b2a1a8f34842652be25f72861bf2d91a0ed7e3d5281682516d104da8ba0ca04c"
+      "bytes": 17422,
+      "sha256": "bf160a6b52e17c38388ef3b28c69f3d65e4dc330589c1083df04773d2ce5582e"
     },
     {
       "path": "pyproject.toml",
-      "bytes": 1265,
-      "sha256": "ef705fe35f958d83c509be235e4ed3eb788c849654606c8dc60387b6ec4d6e0f"
+      "bytes": 1177,
+      "sha256": "6e867a86c04154e82b5778d4904cdd5ef5409b887024682706b7892d4713f712"
     },
     {
       "path": "records/software-checks.json",
-      "bytes": 860,
-      "sha256": "43a70419ae52b6ff0d34b096f7886f8f9b30cda8f1011b3357e852211a8aec55"
+      "bytes": 1851,
+      "sha256": "f5115c83c9e8aaf8e1ee3d1d86a381ac2bd41797287a451a22a3fa0b59e55c1b"
     },
     {
       "path": "requirements-lock.txt",
-      "bytes": 924,
-      "sha256": "f13dda4a7a8ff07d3774dba2d9b346e384e16e806b9a0f6e0af05d7111a4cb3a"
+      "bytes": 877,
+      "sha256": "9153c9cd6d96e35b83a4b22c3e5f35e1856783f4e852e8ebbddc86ec4b879e59"
     },
     {
       "path": "tests/conftest.py",
-      "bytes": 4140,
-      "sha256": "70d2fe6a9e35554fd7c3fc392318c797135d32c726609419e90cfe343fc9db79"
+      "bytes": 4308,
+      "sha256": "9618dfc769488fd3aa2e70a34a0c20f6d473721765eb446f4c140aaafb356e88"
     },
     {
-      "path": "tests/test_driver_transport.py",
-      "bytes": 8596,
-      "sha256": "8d01fa0c99bc6c09682c41615380690f1ef8cf92ef47e789c0630f6bcfb56f58"
+      "path": "tests/test_controller.py",
+      "bytes": 16213,
+      "sha256": "4c75b4c856154e48b42e724ab2ea89be46389f2332a2fdb0dd2b14b1f48953b5"
     },
     {
       "path": "tests/test_gui.py",
-      "bytes": 6378,
-      "sha256": "438b3c78c011ad772982aa35b7830bccebde610645e45a613493712dc4b143f6"
+      "bytes": 10993,
+      "sha256": "5c5f56fc63fe6863fa9b6f7dd0bb31eb917a176bff835b13f7247b9e9123639b"
     },
     {
-      "path": "tests/test_protocol.py",
-      "bytes": 5688,
-      "sha256": "6dc0191c06fc0cfce745dea1772a4eb7de7396852712e8d1b24b1a8f2f76f42c"
-    },
-    {
-      "path": "tests/test_review_regressions.py",
-      "bytes": 8611,
-      "sha256": "06e4d4e65791ce6a3df0181bc2fd82aa15aea627a2b84398e904521391ee46ed"
-    },
-    {
-      "path": "tests/test_safety_integration.py",
-      "bytes": 8309,
-      "sha256": "222cd62a1dbc4625b31ac7304a393010f18d1b42d50abcd752da6a792c3108da"
-    },
-    {
-      "path": "tests/test_simulator_service.py",
-      "bytes": 10581,
-      "sha256": "66b19eafd44bbdb89f4d1caeb890ebbcff52fcc67536a4985c3a67fb6267f22d"
+      "path": "tests/test_simulator.py",
+      "bytes": 2840,
+      "sha256": "e631bdf053137b1bc37b4a943ebc01dbf31610c12f1d0ee8af1acaa664add68f"
     },
     {
       "path": "thermocube/__init__.py",
-      "bytes": 356,
-      "sha256": "75300942c4e85b55d9baed30c3d0d2ef78b186182fbf4d98dc71b936820396ed"
+      "bytes": 289,
+      "sha256": "fec8b768ac4f6bd712a39784d9de7313443d3441a851a29226db2cbb57edfa89"
     },
     {
-      "path": "thermocube/acquisition.py",
-      "bytes": 14340,
-      "sha256": "ace9fa07d432053d573c950a42b0530925c16bab7a52371b9e6ecb6030b65384"
+      "path": "thermocube/assets/style.css",
+      "bytes": 1249,
+      "sha256": "d2ac912a6e299448aac5095a0db75b2c32444213edf6c1cae33e70069f87741b"
     },
     {
-      "path": "thermocube/driver.py",
-      "bytes": 14535,
-      "sha256": "ef59e07374353904314bce7fc47ceaf6b47e21afc83691840d99ff6198c9be77"
+      "path": "thermocube/controller.py",
+      "bytes": 17189,
+      "sha256": "0463bae222342f5c99ab55a3c46e6407af0c00a1d9af4a7dd66b5ed138e722fd"
     },
     {
-      "path": "thermocube/logging.py",
-      "bytes": 5331,
-      "sha256": "df25211630751e4488ed382aba302b636a013a5f251f11977c7bb1db5f479a9d"
-    },
-    {
-      "path": "thermocube/models.py",
-      "bytes": 3469,
-      "sha256": "25639e1dff1c4e13c349e89cb0fb813839dd43c2fdf22901a0e852062a2c7076"
-    },
-    {
-      "path": "thermocube/protocol.py",
-      "bytes": 5200,
-      "sha256": "e507bba5da22da2d6a08e031c7c3f94b7b52764c454cf0f3b607b88e27344b3b"
+      "path": "thermocube/gui.py",
+      "bytes": 17672,
+      "sha256": "b88b2ccb841d8a65132c08977ccd4edfde17b30f40257fdc87a1386d5657a773"
     },
     {
       "path": "thermocube/py.typed",
@@ -207,18 +165,13 @@
     },
     {
       "path": "thermocube/simulator.py",
-      "bytes": 8783,
-      "sha256": "9117fcea394373f2c02a5641f9ce3b212fddda06b4667ae814f3713823652781"
-    },
-    {
-      "path": "thermocube/transport.py",
-      "bytes": 15587,
-      "sha256": "9006a78bd8bc60f2964873fa7febfdb8bdc8f969c3901615551aa108ad0f1b46"
+      "bytes": 6258,
+      "sha256": "01d8b0de467440d3cc562b194924457b20ab9fb5ef66aee0ce1a81660ae8eb7c"
     },
     {
       "path": "tools/verify_artifacts.py",
-      "bytes": 3278,
-      "sha256": "e6528cf8839f6a88fc8ced5df44fdba6167e104c59f2aba80ccfa746da226dcd"
+      "bytes": 3666,
+      "sha256": "65674c8ea3470efd377431f59b489ecd3c8f4fd02a20176eaf8fb64d9f8da14e"
     }
   ]
 }

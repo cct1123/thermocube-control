@@ -24,20 +24,23 @@ import sys
 from pathlib import Path
 sys.path.insert(0, sys.argv[1])
 import thermocube
-import app.cli
+from importlib.metadata import distribution
+from thermocube.gui import main
 assert Path(thermocube.__file__).is_relative_to(sys.argv[1])
-assert Path(app.cli.__file__).is_relative_to(sys.argv[1])
-from app.dash_app import create_app
-from thermocube.acquisition import AcquisitionService
+assert {p.name for p in (Path(sys.argv[1]) / 'thermocube').glob('*.py')} == {'__init__.py', 'controller.py', 'simulator.py', 'gui.py'}
+assert not (Path(sys.argv[1]) / 'app').exists()
+entry = next(e for e in distribution('thermocube-control').entry_points if e.name == 'thermocube')
+assert entry.value == 'thermocube.gui:main'
+from thermocube.gui import Monitor, create_app
 from thermocube.simulator import Simulator
-service = AcquisitionService(Simulator())
-web = create_app(service).server.test_client()
+monitor = Monitor(Simulator())
+web = create_app(monitor).server.test_client()
 assert web.get('/').status_code == 200
 assert web.get('/_dash-layout').status_code == 200
 assert web.get('/assets/style.css').status_code == 200
-assert not service.is_running
-sys.argv = ['thermocube', '--headless', '--duration', '0.1', '--log-dir', sys.argv[2]]
-app.cli.main()
+assert not monitor.is_running
+sys.argv = ['thermocube', '--headless', '--duration', '0.1', '--csv', sys.argv[2]]
+main()
 print('PASS: installed-wheel imports, CSS, Dash endpoints, headless CSV and shutdown')
 """
 
@@ -47,7 +50,11 @@ from pathlib import Path
 sys.path.insert(0, sys.argv[1])
 import thermocube, pytest
 assert Path(thermocube.__file__).is_relative_to(sys.argv[1])
-raise SystemExit(pytest.main(['-q', 'tests']))
+result = pytest.main(['-q', 'tests'])
+if result == 0:
+    import runpy
+    runpy.run_path('examples/experiment.py', run_name='__main__')
+raise SystemExit(result)
 """
 
 
@@ -82,7 +89,7 @@ def main() -> None:
                 "-c",
                 SERIAL_GUARD + WHEEL_CHECK,
                 str(installed),
-                str(temporary / "logs"),
+                str(temporary / "simulation.csv"),
             ],
             check=True,
             cwd=temporary,

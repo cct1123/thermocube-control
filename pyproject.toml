@@ -5,27 +5,26 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "thermocube-control"
 dynamic = ["version"]
-description = "ThermoCube R2 driver, simulator, acquisition service, and local Dash control application"
+description = "Small synchronous ThermoCube R2 controller with optional monitoring and Dash UI"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["pyserial>=3.5,<4"]
 
 [project.optional-dependencies]
-gui = ["dash>=4.4,<5", "plotly>=7,<8", "waitress>=3,<4"]
-dev = ["pytest>=9,<10", "pytest-cov>=7,<8", "ruff>=0.16,<0.17", "mypy>=2,<3", "types-pyserial", "types-waitress", "build", "wheel"]
+gui = ["dash>=4.4,<5"]
+dev = ["pytest>=9,<10", "pytest-cov>=7,<8", "ruff>=0.16,<0.17", "mypy>=2,<3", "types-pyserial", "build", "wheel"]
 
 [project.scripts]
-thermocube = "app.cli:main"
+thermocube = "thermocube.gui:main"
 
 [tool.setuptools.packages.find]
-include = ["thermocube*", "app*"]
+include = ["thermocube*"]
 
 [tool.setuptools.dynamic]
 version = {attr = "thermocube.__version__"}
 
 [tool.setuptools.package-data]
-app = ["assets/*.css"]
-thermocube = ["py.typed"]
+thermocube = ["py.typed", "assets/*.css"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -41,11 +40,11 @@ ignore = ["E501"]
 
 [tool.mypy]
 python_version = "3.11"
-files = ["thermocube", "app"]
+files = ["thermocube"]
 check_untyped_defs = true
 disallow_untyped_defs = true
 warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
-module = ["plotly.*", "dash.*"]
+module = ["dash.*"]
 ignore_missing_imports = true

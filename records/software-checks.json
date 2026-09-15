@@ -1,32 +1,48 @@
 {
-  "candidate": "TC-REVIEW-0.1.1",
-  "date": "2026-09-14",
+  "candidate": "TC-REVIEW-0.2.0",
+  "date": "2026-09-15",
   "hardware_access": false,
   "results": [
     {
-      "command": ".venv\\Scripts\\python --version",
+      "command": ".venv/Scripts/python --version",
       "exit_code": 0,
       "output": "Python 3.12.14"
     },
     {
-      "command": ".venv\\Scripts\\python -m ruff check thermocube app tests tools",
+      "command": ".venv/Scripts/python -m ruff check thermocube tests tools examples",
       "exit_code": 0,
       "output": "All checks passed!"
     },
     {
-      "command": ".venv\\Scripts\\python -m ruff format --check thermocube app tests tools",
+      "command": ".venv/Scripts/python -m ruff format --check thermocube tests tools examples",
       "exit_code": 0,
-      "output": "19 files already formatted"
+      "output": "10 files already formatted"
     },
     {
-      "command": ".venv\\Scripts\\python -m mypy thermocube app",
+      "command": ".venv/Scripts/python -m mypy thermocube",
       "exit_code": 0,
-      "output": "Success: no issues found in 11 source files"
+      "output": "Success: no issues found in 4 source files"
     },
     {
-      "command": ".venv\\Scripts\\python -m pip check",
+      "command": ".venv/Scripts/python -m pytest -q --cov=thermocube --cov-fail-under=90 --cov-report=term-missing --cov-report=json:records/coverage.json --junitxml=records/tests.xml",
+      "exit_code": 0,
+      "output": "65 passed; 94.97% coverage (623/656 statements)"
+    },
+    {
+      "command": ".venv/Scripts/python -m pip check",
       "exit_code": 0,
       "output": "No broken requirements found."
+    },
+    {
+      "command": ".venv/Scripts/python -m build --no-isolation",
+      "exit_code": 0,
+      "output": "Built thermocube_control-0.2.0.tar.gz and thermocube_control-0.2.0-py3-none-any.whl."
+    },
+    {
+      "command": ".venv/Scripts/python tools/verify_artifacts.py",
+      "exit_code": 0,
+      "output": "Installed-wheel module inventory, entry point, imports, CSS, Dash endpoints, headless CSV and shutdown passed. Extracted source suite: 65 passed; simulation example passed."
     }
-  ]
+  ],
+  "environment_note": "Sandbox pytest attempts failed on temporary-directory permissions; the complete suite and artifact checks passed outside that sandbox with physical serial opening and enumeration blocked."
 }

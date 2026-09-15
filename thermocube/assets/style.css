@@ -1,0 +1,20 @@
+:root { font-family: system-ui, sans-serif; color: #e2e8f0; background: #0b1220; color-scheme: dark; }
+body { margin: 0; }
+.shell { max-width: 1100px; margin: auto; padding: 32px; }
+header, .readings, .controls { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+header { justify-content: space-between; }
+.badge { display: inline-block; padding: 8px 12px; margin-right: 8px; background: #1e293b; border-radius: 6px; }
+.warning, .fault { padding: 14px; background: #192438; border-left: 4px solid #fbbf24; }
+.alarm { background: #451a24; border-color: #fb7185; color: #fecdd3; font-weight: 700; }
+.readings section { flex: 1; background: #111c30; padding: 24px; margin: 12px 0; }
+h2 { font-size: 16px; font-weight: 500; color: #94a3b8; }
+strong { font-size: 38px; }
+button, input { padding: 12px; border: 1px solid #64748b; border-radius: 5px; background: #1e293b; color: #f8fafc; }
+button { cursor: pointer; }
+button.danger { border: 2px solid #fb923c; }
+button:disabled { opacity: .4; cursor: not-allowed; }
+button:focus-visible, input:focus-visible { outline: 3px solid #38bdf8; }
+#action, #error { margin: 14px 0; }
+#error { color: #fda4af; }
+footer, .shell > p { line-height: 1.5; }
+footer { margin-top: 20px; color: #94a3b8; }

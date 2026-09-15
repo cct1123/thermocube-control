@@ -61,9 +61,9 @@ parameter `p` in 0..31, derive the command as:
 command = (remote << 7) | (run << 6) | (host_to_chiller << 5) | p
 ```
 
-Reject invalid selectors and unsupported direction/parameter combinations; do
-not silently truncate inputs with a mask. The driver exposes only the
-requested operations. Mathematical encodability is not permission to transmit.
+The controller exposes only the supported device operations. It constructs these
+bits inside its private exchange method; there is no generic command builder or
+public raw-write API. Mathematical encodability is not permission to transmit.
 
 **All three high bits are active for each command** (p. 23 note 2). Direction 0
 does not disable bits 7 and 6. Neither remote=0 nor run=0 means "leave unchanged."
@@ -147,7 +147,8 @@ adds a provisional -20..100 C plausibility check; control bounds default to abse
 
 ## Fault/status byte and explicit profiles
 
-The project requirements specify the default **legacy-r2** profile:
+The project requirements include the **legacy-r2** profile. Hardware construction
+does not select a profile automatically:
 
 | Bit | Mask | User-required legacy meaning |
 | --- | --- | --- |
@@ -206,8 +207,10 @@ RS-485, Ethernet, alarm-width, RTD-offset, or tuning functionality is planned.
 
 ## Transaction scheduling and recovery design
 
-One transport owner permits one outstanding transaction. All operations share a
-monotonic limiter. Implemented minimum interval between command starts is **350 ms**,
+One controller per physical port permits one outstanding transaction. Its callers
+share a lock and monotonic limiter. There is no global registry or ownership-token
+layer; the application owns the controller and uses OS serial exclusivity.
+Implemented minimum interval between command starts is **350 ms**,
 which exceeds 1/3 s and avoids treating rounded 333 ms as an exact safe bound.
 The implementation waits this interval after write completion as well, and after
 a physical open before its first write. No accumulated credits, catch-up bursts,
@@ -219,9 +222,11 @@ For three regular queries (faults, temperature, setpoint), a nominal schedule at
 gives each signal approximately one update per 1.05 s, rather than three fields
 at exactly 1 Hz. Transactions that take longer move the schedule later. GUI
 refresh cadence is independent. Manual control or verification consumes slots and delays/skips polls. A fault
-or state mismatch ends a snapshot after its first query. Both setpoint writes
+or state mismatch ends a status observation after its first query. Both setpoint writes
 and start have a fault preflight; setpoint write/readback therefore costs three
-command slots. A logging failure suspends active query traffic. Timestamps must expose the actual per-signal age.
+command slots. Monitor CSV failure stops its polling; optional core logging does
+not control the caller's experiment. Status timestamps precede the first query
+and conservatively age all values; fields are never merged from older samples.
 
 Use bounded read and write deadlines. Accumulate partial reads until the expected
 data length or deadline; do not wait for an echo. An expired/partial/ambiguous

@@ -1,9 +1,9 @@
-# Staged hardware validation — candidate 0.1.1
+# Staged hardware validation — candidate 0.2.0
 
 **NO-GO for writes. No physical stage is currently approved or executed.**
 This procedure is a reviewable proposal, not permission. Never enter Stage 5+
 automatically. Use one operator, one port owner and the direct driver, without
-Dash, AcquisitionService, terminal auto-probes or another serial application.
+Dash, Monitor, terminal auto-probes or another serial application.
 
 ## Why query testing is a control test
 
@@ -28,7 +28,7 @@ Record candidate manifest/hash; actual approval, approver and scope; unit model,
 serial number, controller/firmware; applicable manual and fault profile; host,
 adapter, selected port and pinout; initial physical state; exact permitted bytes,
 count and duration; log location; operator observations; independent abort method.
-Configuration acknowledgement strings document deliberate choices, not authority
+API acknowledgement strings document deliberate choices, not authority
 or proof of physical conditions.
 
 Before Stage 2 also resolve framing, standby-query applicability and known fault
@@ -37,8 +37,8 @@ setpoint S0, proposed small target S1, permitted run states and run duration.
 The meanings of -AR/-267 and restart/pump/keypad behavior must be established.
 
 Use 9600 baud, 8 data bits, no parity, one stop bit, all flow control off. Initial
-tests use timeout=0.5 s, write_timeout=0.5 s, command_interval=0.35 s and
-open_attempts=1. Changing these values changes the reviewed candidate configuration.
+tests use timeout=0.5 s (both reading and writing) and command_interval=0.35 s.
+connect() attempts opening once. Changing these values changes the reviewed configuration.
 All TX uses the same limiter. Successful host writes do not establish device ACKs.
 
 ## Stage 0 — inspection, zero protocol commands
@@ -68,7 +68,8 @@ OS metadata discovery is allowed only within that scope. Observe RTS/DTR behavio
 during one open/close: requested false values do not guarantee absence of glitches.
 A pyserial open can affect lines even though the application transmits zero bytes.
 
-Use transport-only mode, no queries/control, and one opening attempt. No serial
+Construct the controller with only the port; call connect() and disconnect()
+without arming queries. Opening is attempted once. No serial
 test string, echo check, break, newline, flush-as-probe or implicit stop is permitted.
 Only after isolated behavior and wiring pass may a separately approved attached
 open/close occur. Record any unsolicited received bytes; do not respond to them.
@@ -83,8 +84,8 @@ establish STANDBY using the approved procedure. Explicitly authorize the query
 to select REMOTE and reassert STANDBY. Query approval does not authorize E0/A0
 to create the initial state.
 
-Use a configuration with confirmed profile, binary_framing_confirmed=true,
-allow_queries=true, allow_control=false, allowed_run_states=[false], limits_c=null.
+Construct ThermoCube with the confirmed profile, binary_framing_confirmed=True
+and no limits_c. Do not call enable_control(). The approved query context is run=False.
 Open once, acknowledge the already established context with run=False, then call
 read_faults() **once**. TX **88**, RX **one raw byte**, no echo/ACK or suffix.
 The first TX is at least 350 ms after open.
@@ -97,25 +98,22 @@ from the response. Halt on any fault, unknown bit, transition or uncertain excha
 The operator can use the following one-query lifecycle after actual approval:
 
 ~~~python
-import json
-from pathlib import Path
-from app.cli import hardware_from_config
-from thermocube.driver import QUERY_ACK
-from thermocube.logging import CsvLogger
+from thermocube import ThermoCube
+from thermocube.controller import QUERY_ACK
 
-config = json.loads(Path("reviewed-stage2.json").read_text(encoding="utf-8"))
-device = hardware_from_config(config)
-with CsvLogger("logs/stage2", "unique-approved-session", metadata={"config": config}) as audit:
-    with device:  # Open/close only; neither sends a device command.
-        try:
-            device.arm_queries(run=False, acknowledgement=QUERY_ACK)
-            print(device.read_faults())  # Only TX: 88.
-        finally:
-            for event in device.drain_events():
-                audit.event(event, "hardware")
+# approved_port and confirmed_profile come from the operator's Stage 0–2 record.
+with ThermoCube(approved_port, profile=confirmed_profile,
+               binary_framing_confirmed=True) as device:
+    device.arm_queries(run=False, acknowledgement=QUERY_ACK)
+    print(device.read_faults())  # Only TX: 88; disconnect adds zero bytes.
 ~~~
 
 This deliberately stops after one query. No background acquisition is created.
+Configure an independent trace or the standard thermocube.controller DEBUG logger
+before opening; it records exact TX/RX and uncertain exchanges. Record the returned
+raw fault byte and panel observations. Logging is optional in the reusable core
+and is not an interlock: the operator must verify the required audit evidence
+after each step before authorizing any further traffic.
 
 ## Stage 3 — RTD and fault comparison
 
@@ -149,14 +147,15 @@ not restore local mode or guarantee the physical state.
 ## Stage 5 — human write-approval gate, no automatic transition
 
 Stop and obtain explicit human approval tied to Stage 0–4 results and this
-candidate. Construct a new immutable approval/configuration; the existing query
-approval cannot be widened in place. Start a fresh, explicitly established
-standby session. Set approved Celsius bounds to the intersection of the actual
+candidate. Record approval externally and construct a controller with the reviewed
+profile/framing and limits_c. Start a fresh, explicitly established standby
+session. Set approved Celsius bounds to the intersection of the actual
 device, coolant and load limits. A generic manual range is not a safe default.
 
 Enable control only with the exact acknowledgement:
-ENABLE SETPOINT START AND STOP CONTROL. The approval must already allow control;
-this acknowledgement alone cannot authorize Stage 5.
+ENABLE SETPOINT START AND STOP CONTROL. Call enable_control() only after actual
+human approval. The core has no approval/policy object and does not enforce stage
+numbers: the owning application/operator must enforce the approved finite scope.
 
 **GO requires every item:**
 - Stage 0–4 evidence passes for the exact unit, cable, firmware, profile and framing.
@@ -216,8 +215,10 @@ physical method when necessary; do not repair state with speculative bytes,
 alarm reset, profile changes or an unapproved power cycle. Disconnect alone is
 not an abort mechanism for a running chiller.
 
-Late/ambiguous I/O quarantines the stream, including replacement transports in
-the same process. Reopening cannot rearm or replay commands. Recovery needs an
+Late/ambiguous I/O quarantines that controller's stream. Reopening cannot rearm
+or replay commands. There is no global registry: replacing an object or process
+does not establish safety. Every new owner must verify the stream and physical
+state before arming. Recovery needs an
 actual manufacturer-supported stream reset and physical-state verification,
 then a recovery acknowledgement and separate query arming. An empty buffer
 alone is insufficient. Revalidate after application restart as well.

@@ -9,4 +9,4 @@ include records/candidate-manifest.json
 include records/software-checks.json
 include inputs/README.md
 include inputs/*.pdf
-include examples/*.json
+include examples/*.py

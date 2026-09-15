@@ -1,140 +1,142 @@
-"""All tests deny real serial discovery/open, including application imports."""
+"""Block real serial I/O before collection; test the production serial code path."""
 
-import threading
-from datetime import UTC, datetime, timedelta
+from collections import deque
 
 import pytest
 import serial
 from serial.tools import list_ports
 
-_session_guard = pytest.MonkeyPatch()
-
 
 def forbidden(*args, **kwargs):
-    raise AssertionError("A hardware-free test attempted real serial access")
+    raise AssertionError("Physical serial access is forbidden in offline tests")
 
 
 def pytest_sessionstart(session):
-    # Active before test collection imports application modules.
-    _session_guard.setattr(serial.Serial, "open", forbidden)
-    _session_guard.setattr(list_ports, "comports", forbidden)
+    session.serial_guard = pytest.MonkeyPatch()
+    session.serial_guard.setattr(serial.Serial, "open", forbidden)
+    session.serial_guard.setattr(list_ports, "comports", forbidden)
 
 
 def pytest_sessionfinish(session, exitstatus):
-    _session_guard.undo()
-
-
-@pytest.fixture(autouse=True)
-def deny_hardware(monkeypatch):
-    monkeypatch.setattr(serial.Serial, "open", forbidden)
-    monkeypatch.setattr(list_ports, "comports", forbidden)
+    session.serial_guard.undo()
 
 
 class Clock:
     def __init__(self):
-        self.t = 0.0
-        self.origin = datetime.now(UTC)
-        self.lock = threading.RLock()
+        self.value = 0.0
 
-    def __call__(self):
-        with self.lock:
-            return self.t
+    def monotonic(self):
+        return self.value
 
     def sleep(self, duration):
-        with self.lock:
-            self.t += duration
-
-    def now(self):
-        return self.origin + timedelta(seconds=self())
+        self.value += max(0, duration)
 
 
-class FakeSerial:
-    """Independent binary endpoint: it does not call the production codec."""
+class FakePort:
+    """Literal-byte R2 peer independent of the production codec and API simulator."""
 
     def __init__(self, clock):
         self.clock = clock
-        self.is_open = True
-        self.timeout = 0.5
-        self.rx = b""
-        self.writes = []
-        self.starts = []
-        self.setpoint_raw = 680  # 68 F = 20 C
-        self.temperature_raw = 770  # 77 F = 25 C
+        self.is_open = False
+        self.calls = []
+        self.opens = self.closes = 0
+        self.rx = bytearray()
+        self.replies = deque()
+        self.running = False
+        self.temperature, self.setpoint = 770, 680  # 25 C and 20 C, in tenths F.
         self.faults = 0
-        self.run = False
-        self.m5 = False
-        self.chunk = 100
-        self.override = None
-        self.drop_reply = False
-        self.fail_write = False
-        self.fail_read = False
+        self.m5 = True
+        self.ignore_setpoint = self.ignore_run = False
+        self.chunk_size = 2
+        self.read_delay = self.write_delay = 0
+        self.write_error = self.open_error = self.close_error = None
+        self.bad_read = None
         self.short_write = False
-        self.ignore_setpoint = False
-        self.write_delay = 0
+        self.on_write = None
+
+    def configure(self, **kwargs):
+        self.settings = kwargs
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        return self
+
+    def open(self):
+        self.opens += 1
+        if self.open_error:
+            raise self.open_error
+        self.is_open = True
+
+    def close(self):
+        self.closes += 1
+        self.is_open = False
+        if self.close_error:
+            raise self.close_error
 
     @property
     def in_waiting(self):
         return len(self.rx)
 
-    def write(self, payload):
-        if self.fail_write:
-            raise OSError("USB lost")
-        self.starts.append(self.clock())
-        self.writes.append(payload)
+    def write(self, data):
+        self.calls.append((self.clock.monotonic(), data))
+        if self.on_write:
+            self.on_write(data)
         self.clock.sleep(self.write_delay)
-        command = payload[0]
-        self.run = bool(command & 64)
-        parameter = command & 31
-        if command & 32:
+        if self.write_error:
+            raise self.write_error
+        if self.short_write:
+            return 0
+        command = data[0]
+        assert command & 128, "Driver must deliberately select REMOTE"
+        if not self.ignore_run:
+            self.running = bool(command & 64)
+        parameter, write = command & 31, bool(command & 32)
+        if write:
             if parameter == 1 and not self.ignore_setpoint:
-                self.setpoint_raw = payload[1] + 256 * payload[2]
-        elif parameter in (1, 9):
-            raw = self.setpoint_raw if parameter == 1 else self.temperature_raw
-            self.rx = bytes([raw % 256, raw // 256])
+                self.setpoint = data[1] + 256 * data[2]
+            return len(data)
+        if self.replies:
+            reply = self.replies.popleft()
         elif parameter == 8:
-            self.rx = bytes([self.faults | (64 if self.m5 and not self.run else 0)])
-        if self.override is not None:
-            self.rx, self.override = self.override, None
-        if self.drop_reply:
-            self.rx = b""
-        return len(payload) - 1 if self.short_write else len(payload)
+            reply = bytes([self.faults | (64 if self.m5 and not self.running else 0)])
+        elif parameter in (1, 9):
+            raw = self.setpoint if parameter == 1 else self.temperature
+            reply = bytes([raw % 256, raw // 256])
+        else:
+            raise AssertionError(f"Unexpected parameter: {parameter}")
+        self.rx.extend(reply)
+        return len(data)
 
     def read(self, size):
-        if self.fail_read:
-            raise OSError("USB read lost")
+        self.clock.sleep(self.read_delay)
+        if self.bad_read is not None:
+            return self.bad_read
         if not self.rx:
             self.clock.sleep(self.timeout)
             return b""
-        count = min(size, self.chunk)
-        result, self.rx = self.rx[:count], self.rx[count:]
-        return result
-
-    def close(self):
-        self.is_open = False
+        count = min(size, self.chunk_size)
+        reply = bytes(self.rx[:count])
+        del self.rx[:count]
+        return reply
 
 
 @pytest.fixture
-def rig():
-    from thermocube.driver import ThermoCube
-    from thermocube.models import TemperatureLimits
-    from thermocube.transport import SerialConfig, SerialTransport
+def hardware(monkeypatch):
+    from thermocube import ThermoCube, controller
 
     clock = Clock()
-    endpoint = FakeSerial(clock)
-
-    def factory(config):
-        endpoint.is_open = True
-        return endpoint
-
-    transport = SerialTransport(
-        SerialConfig("FAKE"), serial_factory=factory, clock=clock, sleep=clock.sleep
+    wire = FakePort(clock)
+    monkeypatch.setattr(controller, "time", clock)
+    monkeypatch.setattr(serial, "Serial", wire.configure)
+    device = ThermoCube(
+        "TEST-PORT", profile="thermocube-ii-m5", binary_framing_confirmed=True, limits_c=(0, 40)
     )
-    device = ThermoCube(transport, limits=TemperatureLimits(-5, 50), now=clock.now)
-    return device, endpoint, clock, transport
+    yield device, wire, clock
+    wire.close_error = None
+    device.disconnect()
 
 
 def arm(device, *, control=False, run=False):
-    from thermocube.driver import CONTROL_ACK, QUERY_ACK
+    from thermocube.controller import CONTROL_ACK, QUERY_ACK
 
     device.connect()
     device.arm_queries(run=run, acknowledgement=QUERY_ACK)
