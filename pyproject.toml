@@ -23,7 +23,7 @@ thermocube = "thermocube.gui:main"
 module-name = "thermocube"
 source-include = [
     "uv.lock", ".python-version", "AGENTS.md", "ARCHITECTURE.md", 'prompt\ log.md',
-    "docs/*.md", "examples/*.py", "tests/*.py", "tools/*.py",
+    "docs/*.md", "docs/images/*.png", "examples/*.py", "tests/*.py", "tools/*.py",
     "records/candidate-manifest.json", "records/software-checks.json",
     "inputs/README.md", "inputs/*.pdf",
 ]

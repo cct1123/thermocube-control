@@ -44,6 +44,14 @@ import tests. They no longer insert checkout paths into `sys.path` or inherit
 installed dependencies from the development environment. Hardware behavior and
 its three-module API were not changed by this packaging migration.
 
+## First-time-user guide
+
+The README now leads with implementation/validation status and a three-command
+uv Quick Start, followed by a simulator cooling run, one Python example, hardware
+preparation, safety and troubleshooting. A real simulator screenshot and a short
+workflow diagram show the intended first session. Developer details are last.
+The screenshot is included in the source distribution. Runtime code is unchanged.
+
 ## Retained hardware protections and tradeoffs
 
 - Build commands from documented bit fields; LOW before HIGH, unsigned tenths F.
@@ -80,9 +88,18 @@ headless CSV/shutdown pass; all 65 tests also pass from the extracted source
 archive. Reproduction commands are in [TESTING.md](TESTING.md).
 
 The relocated package passes HTTP layout/action/history and packaged-asset tests.
-Before relocation, a simulation-only browser check covered: confirmed 18 C setpoint, START, retained state
-and history after reload, cooling trace, STANDBY and disconnected/disabled display.
-The temporary server and browser were closed. No physical evidence is claimed.
+The README browser check confirmed initial CONNECTED/STANDBY, an 18 C setpoint,
+START, a cooling trace and return to STANDBY; the running display was captured in
+docs/images/simulator.png. Physical serial opening and discovery were blocked.
+The temporary server and browser were closed. The earlier browser check also
+covered retained state/history after reload and the disconnected/disabled display.
+
+The README Python snippet and existing example ran successfully with serial
+access blocked. The documented 10-second headless run produced 10 standby CSV
+rows, printed its final status and refused to overwrite the file on a second run.
+All 12 local README links/anchors resolve; the HTTPS clone URL resolves to the
+repository. The source archive contains the exact README and screenshot, and
+wheel metadata contains the new README. No physical evidence is claimed.
 
 The 0.1.1 count of 640 tests is not carried forward: hundreds of bit permutations
 are now grouped into exhaustive tests, and internal-architecture tests were removed.
